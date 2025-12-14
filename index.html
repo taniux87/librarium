@@ -4,12 +4,17 @@
   <meta charset="UTF-8">
   <title>Librarium.es – Recomendaciones, Rankings y Reseñas de Libros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/estilos.css">
+  <!-- Ruta absoluta para evitar 404 -->
+  <link rel="stylesheet" href="/css/estilos.css">
+
+  <!-- Google AdSense: script global (solo uno, en head) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1152236234412271"
+     crossorigin="anonymous"></script>
 </head>
 
 <body>
 
-  <!-- ✅ HEADER -->
+  <!-- HEADER -->
   <header class="header">
     <div class="container header-flex">
       <div class="logo-box">
@@ -27,7 +32,7 @@
     </div>
   </header>
 
-  <!-- ✅ HERO -->
+  <!-- HERO -->
   <section class="hero" style="background-image: url('img/hero.png');">
     <div class="container" style="background: rgba(0,0,0,0.55); padding: 60px 30px; border-radius: 12px;">
       <h2 style="color: #fff; font-size: 2.2rem;">Descubre los mejores libros del momento</h2>
@@ -35,25 +40,24 @@
     </div>
   </section>
 
-  <!-- ✅ CONTENIDO PRINCIPAL -->
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="container">
 
-    <!-- ✅ NOVEDADES -->
+    <!-- NOVEDADES -->
     <section class="section">
       <h2>Novedades del mes</h2>
       <div id="novedades" class="grid"></div>
     </section>
 
-    <!-- ✅ RANKING AUTOMÁTICO -->
+    <!-- RANKING -->
     <section class="section">
       <h2>Ranking automático: Fantasía</h2>
       <div id="ranking" class="grid"></div>
     </section>
 
-    <!-- ✅ BLOG -->
+    <!-- BLOG -->
     <section class="section">
       <h2>Últimos artículos del blog</h2>
-
       <div class="list">
         <a class="list-item" href="articulo1.html">Cómo elegir tu próxima lectura sin perder tiempo</a>
         <a class="list-item" href="articulo2.html">Autores que deberías conocer este año</a>
@@ -61,9 +65,20 @@
       </div>
     </section>
 
+    <!-- BLOQUE DE ANUNCIO (dentro del body, antes de cerrar main) -->
+    <div style="text-align:center; margin:20px 0;">
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:300px;height:250px"
+           data-ad-client="ca-pub-1152236234412271"
+           data-ad-slot="1234567890"></ins>
+    </div>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
   </main>
 
-  <!-- ✅ FOOTER -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
       <p>© 2025 Librarium.es – Todos los derechos reservados</p>
@@ -76,13 +91,14 @@
   </footer>
 
 <script>
-  // ✅ Estrellas visuales
+  // Estrellas visuales (declaración correcta)
   function generarEstrellas(rating) {
-    const estrellas = Math.round(rating);
-    return "⭐".repeat(estrellas) + ` (${rating}/5)`;
+    const r = Number(rating) || 0;
+    const estrellas = Math.round(r);
+    return "⭐".repeat(estrellas) + ` (${r}/5)`;
   }
 
-  // ✅ Rating alternativo si Google no tiene
+  // Rating alternativo (una sola función)
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
@@ -91,26 +107,31 @@
     return rating.toFixed(1);
   }
 
-  // ✅ Buscar libros en Google Books
+  // Buscar libros en Google Books (con encode y manejo de errores)
   async function buscarLibros(query, max = 4) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&langRestrict=es&maxResults=${max}`;
+    const q = encodeURIComponent(query);
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=es&maxResults=${max}`;
     const res = await fetch(url);
     const data = await res.json();
     return data.items || [];
   }
 
-  // ✅ Crear tarjeta clicable
+  // Normaliza URLs http -> https para evitar mixed content
+  function asegurarHttps(url) {
+    if (!url) return url;
+    return url.replace(/^http:\/\//i, "https://");
+  }
+
+  // Crear tarjeta clicable (normaliza portada)
   function crearCard(item) {
-    const info = item.volumeInfo;
-    const id = item.id;
-    const portada = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
+    const info = item.volumeInfo || {};
+    const id = item.id || "";
+    const portadaRaw = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
+    const portada = asegurarHttps(portadaRaw);
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
     const descripcion = info.description ? info.description.substring(0, 120) + "..." : "Sin resumen disponible.";
-
-    const rating = info.averageRating
-      ? info.averageRating
-      : ratingAlternativo(titulo);
+    const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
 
     return `
       <a href="libro.html?id=${encodeURIComponent(id)}" class="card" style="text-decoration: none; color: inherit;">
@@ -123,18 +144,22 @@
     `;
   }
 
-  // ✅ Cargar novedades del mes
+  // Cargar novedades con manejo de errores
   async function cargarNovedades() {
-    const libros = await buscarLibros("novedades editoriales libros 2025");
-    const cont = document.getElementById("novedades");
-    cont.innerHTML = "";
-
-    libros.forEach(item => {
-      cont.innerHTML += crearCard(item);
-    });
+    try {
+      const libros = await buscarLibros("novedades editoriales libros 2025");
+      const cont = document.getElementById("novedades");
+      cont.innerHTML = "";
+      libros.forEach(item => cont.innerHTML += crearCard(item));
+    } catch (e) {
+      console.error("Error cargando novedades:", e);
+      const cont = document.getElementById("novedades");
+      if (cont) cont.innerHTML = "<p>No se pudieron cargar las novedades.</p>";
+    }
   }
 
   cargarNovedades();
 </script>
+
 </body>
 </html>
