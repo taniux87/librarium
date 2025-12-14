@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>Librarium.es – Recomendaciones, Rankings y Reseñas de Libros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <!-- Ruta absoluta para evitar 404 -->
   <link rel="stylesheet" href="/css/estilos.css">
 
-  <!-- Google AdSense: script global (solo uno, en head) -->
+  <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1152236234412271"
      crossorigin="anonymous"></script>
 </head>
@@ -65,7 +66,7 @@
       </div>
     </section>
 
-    <!-- BLOQUE DE ANUNCIO (dentro del body, antes de cerrar main) -->
+    <!-- BLOQUE DE ANUNCIO -->
     <div style="text-align:center; margin:20px 0;">
       <ins class="adsbygoogle"
            style="display:inline-block;width:300px;height:250px"
@@ -124,10 +125,30 @@
     return null;
   }
 
-  function portadaOpenLibrary(isbn) {
-    return isbn
-      ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
-      : "img/ejemplo.jpg";
+  /* ✅ FUNCIÓN HÍBRIDA DE PORTADAS (Open Library + Google Books + fallback) */
+  function portadaLibro(info) {
+    const isbn = obtenerISBN(info);
+
+    // ✅ 1. Si hay ISBN → Open Library
+    if (isbn) {
+      return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    }
+
+    // ✅ 2. Si NO hay ISBN → usar portada de Google Books
+    if (info.imageLinks?.thumbnail) {
+      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
+    }
+
+    // ✅ 3. Si no hay nada → imagen por defecto
+    return "img/ejemplo.jpg";
+  }
+
+  function generarEnlaceAmazon(titulo, autor, isbn) {
+    if (isbn) {
+      return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
+    }
+    const query = encodeURIComponent(`${titulo} ${autor}`);
+    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
 
   function crearCard(item) {
@@ -138,11 +159,8 @@
     const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
 
     const isbn = obtenerISBN(info);
-    const portada = portadaOpenLibrary(isbn);
-
-    const amazonUrl = isbn
-      ? `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`
-      : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
+    const portada = portadaLibro(info); // ✅ ahora híbrida
+    const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
 
     return `
       <a href="${amazonUrl}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
