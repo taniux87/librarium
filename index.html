@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <title>Librarium.es – Recomendaciones, Rankings y Reseñas de Libros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Ruta absoluta para evitar 404 -->
   <link rel="stylesheet" href="/css/estilos.css">
 
-  <!-- Google AdSense -->
+  <!-- Google AdSense: script global (solo uno, en head) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1152236234412271"
      crossorigin="anonymous"></script>
 </head>
@@ -64,16 +65,13 @@
       </div>
     </section>
 
-    <!-- BLOQUE DE ANUNCIO -->
+    <!-- BLOQUE DE ANUNCIO (dentro del body, antes de cerrar main) -->
     <div style="text-align:center; margin:20px 0;">
       <ins class="adsbygoogle"
-           style="display:block"
+           style="display:inline-block;width:300px;height:250px"
            data-ad-client="ca-pub-1152236234412271"
-           data-ad-slot="4412052482"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-ad-slot="4412052482"></ins>
     </div>
-
     <script>
       (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
@@ -93,12 +91,14 @@
   </footer>
 
 <script>
+  // Estrellas visuales (declaración correcta)
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
     const estrellas = Math.round(r);
     return "⭐".repeat(estrellas) + ` (${r}/5)`;
   }
 
+  // Rating alternativo (una sola función)
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
@@ -107,6 +107,7 @@
     return rating.toFixed(1);
   }
 
+  // Buscar libros en Google Books (con encode y manejo de errores)
   async function buscarLibros(query, max = 4) {
     const q = encodeURIComponent(query);
     const url = `https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=es&maxResults=${max}`;
@@ -115,12 +116,13 @@
     return data.items || [];
   }
 
+  // Normaliza URLs http -> https para evitar mixed content
   function asegurarHttps(url) {
     if (!url) return url;
     return url.replace(/^http:\/\//i, "https://");
   }
 
-  /* ✅ FUNCIÓN CORREGIDA PARA ENLACES AMAZON */
+  // Crear tarjeta clicable (versión con enlace Amazon)
   function crearCard(item) {
     const info = item.volumeInfo || {};
     const portadaRaw = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
@@ -130,6 +132,7 @@
     const descripcion = info.description ? info.description.substring(0, 120) + "..." : "Sin resumen disponible.";
     const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
 
+    // ✅ Obtener ISBN
     let isbn13 = null;
     if (Array.isArray(info.industryIdentifiers)) {
       for (const idObj of info.industryIdentifiers) {
@@ -138,6 +141,7 @@
       }
     }
 
+    // ✅ Construir enlace Amazon
     const AFFILIATE_TAG = "librarium01-21";
     const amazonUrl = isbn13
       ? `https://www.amazon.es/dp/${isbn13}?tag=${AFFILIATE_TAG}`
@@ -154,6 +158,7 @@
     `;
   }
 
+  // Cargar novedades con manejo de errores
   async function cargarNovedades() {
     try {
       const libros = await buscarLibros("novedades editoriales libros 2025");
