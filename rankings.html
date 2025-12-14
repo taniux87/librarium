@@ -101,19 +101,28 @@
     return null;
   }
 
-  function portadaOpenLibrary(isbn) {
-    return isbn
-      ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
-      : "img/ejemplo.jpg";
+  /* ✅ FUNCIÓN HÍBRIDA DE PORTADAS */
+  function portadaLibro(info) {
+    const isbn = obtenerISBN(info);
+
+    // ✅ 1. Si hay ISBN → Open Library
+    if (isbn) {
+      return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    }
+
+    // ✅ 2. Si NO hay ISBN → portada de Google Books
+    if (info.imageLinks?.thumbnail) {
+      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
+    }
+
+    // ✅ 3. Si no hay nada → imagen por defecto
+    return "img/ejemplo.jpg";
   }
 
   function generarEnlaceAmazon(titulo, autor, isbn) {
-    // 1. Si hay ISBN → intentar ASIN directo
     if (isbn) {
       return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
     }
-
-    // 2. Si no hay ISBN → búsqueda por título + autor
     const query = encodeURIComponent(`${titulo} ${autor}`);
     return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
@@ -125,8 +134,7 @@
     const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
 
     const isbn = obtenerISBN(info);
-    const portada = portadaOpenLibrary(isbn);
-
+    const portada = portadaLibro(info); // ✅ híbrida
     const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
 
     return `
