@@ -84,6 +84,14 @@
       : "img/ejemplo.jpg";
   }
 
+  function generarEnlaceAmazon(titulo, autor, isbn) {
+    if (isbn) {
+      return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
+    }
+    const query = encodeURIComponent(`${titulo} ${autor}`);
+    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
+  }
+
   async function cargarLibro() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
@@ -107,12 +115,8 @@
       document.getElementById("tituloHero").textContent = titulo;
 
       const isbn = obtenerISBN(info);
-
       const portada = portadaOpenLibrary(isbn);
-
-      const enlaceAmazon = isbn
-        ? `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`
-        : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
+      const enlaceAmazon = generarEnlaceAmazon(titulo, autor, isbn);
 
       document.getElementById("contenidoLibro").innerHTML = `
         <div class="card" style="max-width: 700px; margin: auto; display:flex; gap:20px; align-items:flex-start;">
@@ -123,8 +127,8 @@
             <h3 style="margin-top:0;">${titulo}</h3>
             <p><strong>${autor}</strong></p>
 
-            <!-- ✅ Botón Amazon arriba -->
-            <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:10px 0;padding:10px 14px;background:#ff9900;color:#111;border-radius:6px;text-decoration:none;font-weight:600;">
+            <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer"
+               style="display:inline-block;margin:10px 0;padding:10px 14px;background:#ff9900;color:#111;border-radius:6px;text-decoration:none;font-weight:600;">
               Ver en Amazon
             </a>
 
