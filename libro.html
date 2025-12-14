@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Libro – Librarium.es</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/estilos.css">
+  <meta name="description" content="Ficha completa del libro con valoración, resumen y detalles.">
+</head>
+
+<body>
+
+<header class="header">
+  <div class="container header-flex">
+    <div class="logo-box">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text">Librarium.es</span>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="background-image: url('img/hero.png');">
+  <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
+    <h2 id="tituloHero" style="color: #fff; font-size: 2.2rem;">Cargando...</h2>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="section" id="contenidoLibro">
+    <p>Cargando datos...</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Librarium.es – Todos los derechos reservados</p>
+    <div class="footer-links">
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="cookies.html">Política de cookies</a>
+      <a href="aviso-legal.html">Aviso legal</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ✅ Estrellas visuales
+  function generarEstrellas(rating) {
+    const estrellas = Math.round(rating);
+    return "⭐".repeat(estrellas) + ` (${rating}/5)`;
+  }
+
+  // ✅ Rating alternativo si Google no tiene
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    const random = (seed % 13) / 10;
+    const rating = 3.5 + random;
+    return rating.toFixed(1);
+  }
+
+  // ✅ Buscar ASIN automáticamente en Amazon
+  async function buscarASIN(titulo) {
+    const query = encodeURIComponent(titulo + " libro");
+    const url = `https://www.amazon.es/s?k=${query}`;
+
+    try {
+      const res = await fetch(url);
+      const html = await res.text();
+
+      const asinMatch = html.match(/\/dp\/([A-Z0-9]{10})/);
+      if (asinMatch) return asinMatch[1];
+    } catch (e) {
+      console.log("Error buscando ASIN:", e);
+    }
+
+    return null;
+  }
+
+  // ✅ Cargar datos del libro desde Google Books
+  async function cargarLibro() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    if (!id) {
+      document.getElementById("contenidoLibro").innerHTML = "<p>Error: libro no encontrado.</p>";
+      return;
+    }
+
+    const url = `https://www.googleapis.com/books/v1/volumes/${id}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const info = data.volumeInfo;
+
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+    const portada = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
+    const descripcion = info.description || "Sin descripción disponible.";
+    const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+
+    document.getElementById("tituloHero").textContent = titulo;
+
+    // ✅ Buscar ASIN automáticamente
+    const asin = await buscarASIN(titulo);
+    const enlaceAmazon = asin
+      ? `https://www.amazon.es/dp/${asin}?tag=librarium01-21`
+      : "#";
+
+    document.getElementById("contenidoLibro").innerHTML = `
+      <div class="card" style="max-width: 500px; margin: auto;">
+        <img src="${portada}" alt="Portada libro">
+        <h3>${titulo}</h3>
+        <p><strong>${autor}</strong></p>
+        <p>${generarEstrellas(rating)}</p>
+        <p>${descripcion}</p>
+
+        <a class="btn-secondary" href="${enlaceAmazon}" target="_blank">
+          Ver en Amazon
+        </a>
+      </div>
+    `;
+  }
+
+  cargarLibro();
+</script>
+
+</body>
+</html>

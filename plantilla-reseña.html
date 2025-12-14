@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reseña: TÍTULO DEL LIBRO – Librarium.es</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/estilos.css">
+  <meta name="description" content="Reseña completa de TÍTULO DEL LIBRO. Opinión, análisis y datos reales del libro.">
+</head>
+
+<body>
+
+  <!-- ✅ HEADER -->
+  <header class="header">
+    <div class="container header-flex">
+      <div class="logo-box">
+        <span class="logo-icon">📚</span>
+        <span class="logo-text">Librarium.es</span>
+      </div>
+
+      <nav class="menu">
+        <a href="index.html">Inicio</a>
+        <a href="blog.html">Blog</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="resenas.html" class="active">Reseñas</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ✅ HERO -->
+  <section class="hero" style="background-image: url('img/hero.png');">
+    <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
+      <h1 style="color: #fff; font-size: 2.2rem;">Reseña: TÍTULO DEL LIBRO</h1>
+      <p style="color: #ddd; font-size: 1.1rem;">Datos reales + análisis editorial</p>
+    </div>
+  </section>
+
+  <!-- ✅ CONTENIDO PRINCIPAL -->
+  <main class="container">
+
+    <section class="section">
+
+      <h2>Datos del libro</h2>
+      <div id="datos-libro" class="grid"></div>
+
+      <h2>Mi opinión personal</h2>
+      <p>
+        Aquí escribes tu análisis editorial:  
+        qué te ha gustado, qué no, a quién se lo recomendarías, qué aporta al género, etc.
+      </p>
+
+      <h2>Puntos fuertes</h2>
+      <ul>
+        <li>Ejemplo de punto fuerte.</li>
+        <li>Otro punto fuerte.</li>
+        <li>Algo que destaque del libro.</li>
+      </ul>
+
+      <h2>Puntos débiles</h2>
+      <ul>
+        <li>Ejemplo de punto débil.</li>
+        <li>Otro punto débil.</li>
+      </ul>
+
+      <h2>¿A quién se lo recomiendo?</h2>
+      <p>
+        Aquí defines el tipo de lector ideal:  
+        principiantes, fans del género, lectores jóvenes, etc.
+      </p>
+
+      <h2>Comprar el libro</h2>
+      <p>
+        Aquí pones tu enlace de Amazon Afiliados cuando lo tengas:
+        <br><br>
+        <a class="btn-secondary" href="#">Comprar en Amazon</a>
+      </p>
+
+    </section>
+
+  </main>
+
+  <!-- ✅ FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 Librarium.es – Todos los derechos reservados</p>
+      <div class="footer-links">
+        <a href="privacidad.html">Política de privacidad</a>
+        <a href="cookies.html">Política de cookies</a>
+        <a href="aviso-legal.html">Aviso legal</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ✅ GOOGLE BOOKS API -->
+  <script>
+    // Cambia este valor por el título del libro que estés reseñando
+    const tituloLibro = "TÍTULO DEL LIBRO";
+
+    async function buscarLibro(titulo) {
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(titulo)}&langRestrict=es&maxResults=1`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.items?.[0]?.volumeInfo || null;
+    }
+
+    function crearCard(info) {
+      const portada = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
+      const autores = info.authors ? info.authors.join(", ") : "Autor desconocido";
+      const descripcion = info.description || "Sin descripción disponible";
+      const rating = info.averageRating ? `⭐ ${info.averageRating}/5` : "Sin valoración";
+
+      return `
+        <div class="card">
+          <img src="${portada}" alt="Portada libro">
+          <h3>${info.title}</h3>
+          <p><strong>${autores}</strong></p>
+          <p>${rating}</p>
+          <p>${descripcion.substring(0, 200)}...</p>
+        </div>
+      `;
+    }
+
+    async function cargarDatos() {
+      const info = await buscarLibro(tituloLibro);
+      const cont = document.getElementById("datos-libro");
+
+      if (!info) {
+        cont.innerHTML = "<p>No se encontraron datos del libro.</p>";
+        return;
+      }
+
+      cont.innerHTML = crearCard(info);
+    }
+
+    cargarDatos();
+  </script>
+
+</body>
+</html>
