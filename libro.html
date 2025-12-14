@@ -95,36 +95,28 @@
     try {
       const res = await fetch('asin.json');
       asinData = await res.json();
-      console.log("ASIN data cargada correctamente. Claves:", Object.keys(asinData));
     } catch (e) {
       console.error("No se pudo cargar o parsear asin.json. Usando enlaces de respaldo.", e);
       asinData = {}; // Asegura que quede vacío si falla
     }
   }
 
-  /* ✅ GENERADOR DE ENLACE AMAZON CON BÚSQUEDA EN ASIN.JSON POR TÍTULO */
-  function generarEnlaceAmazon(titulo, autor, isbn) {
+  /* ✅ GENERADOR DE ENLACE AMAZON FINAL: ASIN (por Título) o BÚSQUEDA */
+  function generarEnlaceAmazon(titulo, autor) {
     // 1. Prioridad: Buscar el TÍTULO en la data cargada (ASIN)
-    if (asinData[titulo]) {
-      const asin = asinData[titulo];
-      console.log(`Usando ASIN conocido (por título): ${asin}`);
+    // Usamos .trim() para asegurar que no hay espacios extra en el título
+    const tituloLimpio = titulo.trim();
+    if (asinData[tituloLimpio]) {
+      const asin = asinData[tituloLimpio];
       return `https://www.amazon.es/dp/${asin}?tag=${AFFILIATE_TAG}`;
     }
 
-    // 2. Segunda Prioridad: Usar el ISBN de Google Books
-    if (isbn) {
-      console.log(`Usando ISBN de Google Books: ${isbn}`);
-      return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
-    }
-
-    // 3. Opción de fallback: Búsqueda por palabras clave
-    console.log("Usando búsqueda por título y autor.");
-    const query = encodeURIComponent(`${titulo} ${autor}`);
+    // 2. Opción de fallback: Búsqueda por palabras clave (siempre funciona)
+    const query = encodeURIComponent(`${tituloLimpio} ${autor}`);
     return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
 
   async function cargarLibro() {
-    // ⚠️ PASO CRÍTICO: Cargar la data de ASIN antes de buscar el libro
     await cargarAsinData();
     
     const params = new URLSearchParams(window.location.search);
@@ -148,16 +140,16 @@
 
       document.getElementById("tituloHero").textContent = titulo;
 
-      const isbn = obtenerISBN(info);
+      const isbn = obtenerISBN(info); // Mantenemos el ISBN para la portada
       const portada = portadaLibro(info);
       
-      // Generamos el enlace usando la nueva lógica que verifica el TÍTULO en asinData
-      const enlaceAmazon = generarEnlaceAmazon(titulo, autor, isbn);
+      // Generamos el enlace usando la nueva lógica (ASIN o Búsqueda)
+      const enlaceAmazon = generarEnlaceAmazon(titulo, autor);
 
       document.getElementById("contenidoLibro").innerHTML = `
         <div class="card" style="max-width: 700px; margin: auto; display:flex; flex-wrap: wrap; gap:20px; align-items:flex-start;">
           <div style="flex:0 0 200px; width: 100%;">
-            <img src="${portada}" alt="Portada libro">
+            <img src="${portada}" alt="Portada libro" style="width:100%; border-radius:6px;">
           </div>
           <div style="flex:1; min-width: 300px;">
             <h3 style="margin-top:0;">${titulo}</h3>
