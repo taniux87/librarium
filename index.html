@@ -123,26 +123,43 @@
   }
 
   // Crear tarjeta clicable (normaliza portada)
-  function crearCard(item) {
-    const info = item.volumeInfo || {};
-    const id = item.id || "";
-    const portadaRaw = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
-    const portada = asegurarHttps(portadaRaw);
-    const titulo = info.title || "Título no disponible";
-    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
-    const descripcion = info.description ? info.description.substring(0, 120) + "..." : "Sin resumen disponible.";
-    const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+ // Crear tarjeta clicable (versión con enlace Amazon)
+function crearCard(item) {
+  const info = item.volumeInfo || {};
+  const portadaRaw = info.imageLinks?.thumbnail || "img/ejemplo.jpg";
+  const portada = asegurarHttps(portadaRaw);
+  const titulo = info.title || "Título no disponible";
+  const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+  const descripcion = info.description ? info.description.substring(0, 120) + "..." : "Sin resumen disponible.";
+  const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
 
-    return `
-      <a href="libro.html?id=${encodeURIComponent(id)}" class="card" style="text-decoration: none; color: inherit;">
-        <img src="${portada}" alt="Portada libro">
-        <h3>${titulo}</h3>
-        <p><strong>${autor}</strong></p>
-        <p>${generarEstrellas(rating)}</p>
-        <p>${descripcion}</p>
-      </a>
-    `;
+  // ✅ Obtener ISBN
+  let isbn13 = null;
+  if (Array.isArray(info.industryIdentifiers)) {
+    for (const idObj of info.industryIdentifiers) {
+      if (idObj.type === "ISBN_13") { isbn13 = idObj.identifier; break; }
+      if (!isbn13 && idObj.type === "ISBN_10") isbn13 = idObj.identifier;
+    }
   }
+
+  // ✅ Construir enlace Amazon
+  const AFFILIATE_TAG = "librarium01-21";
+  const amazonUrl = isbn13
+    ? `https://www.amazon.es/dp/${isbn13}?tag=${AFFILIATE_TAG}`
+    : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
+
+  // ✅ Tarjeta igual que antes, pero enlazando a Amazon
+  return `
+    <a href="${amazonUrl}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+      <img src="${portada}" alt="Portada libro">
+      <h3>${titulo}</h3>
+      <p><strong>${autor}</strong></p>
+      <p>${generarEstrellas(rating)}</p>
+      <p>${descripcion}</p>
+    </a>
+  `;
+}
+
 
   // Cargar novedades con manejo de errores
   async function cargarNovedades() {
