@@ -53,6 +53,7 @@
 </footer>
 
 <script>
+  // ✅ TU TAG DE AFILIADO
   const AFFILIATE_TAG = "librarium01-21";
 
   function generarEstrellas(rating) {
@@ -78,28 +79,27 @@
     return null;
   }
 
-  /* ✅ FUNCIÓN HÍBRIDA DE PORTADAS */
   function portadaLibro(info) {
     const isbn = obtenerISBN(info);
-
-    // ✅ 1. Si hay ISBN → Open Library
+    // 1. Si hay ISBN → Open Library
     if (isbn) {
       return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
     }
-
-    // ✅ 2. Si NO hay ISBN → portada de Google Books
+    // 2. Si NO hay ISBN → portada de Google Books
     if (info.imageLinks?.thumbnail) {
       return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
     }
-
-    // ✅ 3. Si no hay nada → imagen por defecto
+    // 3. Si no hay nada → imagen por defecto
     return "img/ejemplo.jpg";
   }
 
+  // ✅ GENERADOR INTELIGENTE DE ENLACE AMAZON (EVITA ERRORES 404)
   function generarEnlaceAmazon(titulo, autor, isbn) {
     if (isbn) {
+      // Si tenemos ISBN, vamos directo al producto
       return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
     }
+    // Si NO hay ISBN, hacemos una búsqueda del título + autor
     const query = encodeURIComponent(`${titulo} ${autor}`);
     return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
@@ -127,25 +127,27 @@
       document.getElementById("tituloHero").textContent = titulo;
 
       const isbn = obtenerISBN(info);
-      const portada = portadaLibro(info);  // ✅ híbrida
+      const portada = portadaLibro(info);
+      
+      // Aquí generamos el enlace seguro
       const enlaceAmazon = generarEnlaceAmazon(titulo, autor, isbn);
 
       document.getElementById("contenidoLibro").innerHTML = `
-        <div class="card" style="max-width: 700px; margin: auto; display:flex; gap:20px; align-items:flex-start;">
-          <div style="flex:0 0 200px;">
+        <div class="card" style="max-width: 700px; margin: auto; display:flex; flex-wrap: wrap; gap:20px; align-items:flex-start;">
+          <div style="flex:0 0 200px; width: 100%;">
             <img src="${portada}" alt="Portada libro" style="width:100%; border-radius:6px;">
           </div>
-          <div style="flex:1;">
+          <div style="flex:1; min-width: 300px;">
             <h3 style="margin-top:0;">${titulo}</h3>
             <p><strong>${autor}</strong></p>
 
             <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer"
-               style="display:inline-block;margin:10px 0;padding:10px 14px;background:#ff9900;color:#111;border-radius:6px;text-decoration:none;font-weight:600;">
-              Ver en Amazon
+               style="display:inline-block; margin:10px 0; padding:12px 20px; background:#ff9900; color:#111; border-radius:6px; text-decoration:none; font-weight:bold; border: 1px solid #e47911;">
+              🛒 Ver precio en Amazon
             </a>
 
             <p>${generarEstrellas(rating)}</p>
-            <p style="margin-top:15px;">${descripcion}</p>
+            <p style="margin-top:15px; line-height: 1.6;">${descripcion}</p>
           </div>
         </div>
       `;

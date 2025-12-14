@@ -70,8 +70,6 @@
 </footer>
 
 <script>
-  const AFFILIATE_TAG = "librarium01-21";
-
   function generarEstrellas(rating) {
     const estrellas = Math.round(rating);
     return "⭐".repeat(estrellas) + ` (${rating}/5)`;
@@ -101,44 +99,29 @@
     return null;
   }
 
-  /* ✅ FUNCIÓN HÍBRIDA DE PORTADAS */
   function portadaLibro(info) {
     const isbn = obtenerISBN(info);
-
-    // ✅ 1. Si hay ISBN → Open Library
     if (isbn) {
       return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
     }
-
-    // ✅ 2. Si NO hay ISBN → portada de Google Books
     if (info.imageLinks?.thumbnail) {
       return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
     }
-
-    // ✅ 3. Si no hay nada → imagen por defecto
     return "img/ejemplo.jpg";
   }
 
-  function generarEnlaceAmazon(titulo, autor, isbn) {
-    if (isbn) {
-      return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
-    }
-    const query = encodeURIComponent(`${titulo} ${autor}`);
-    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
-  }
-
+  /* ✅ AHORA LAS TARJETAS LLEVAN A LIBRO.HTML */
   function crearCard(item) {
+    const id = item.id; // Capturamos el ID
     const info = item.volumeInfo;
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
     const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+    const portada = portadaLibro(info); 
 
-    const isbn = obtenerISBN(info);
-    const portada = portadaLibro(info); // ✅ híbrida
-    const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
-
+    // Enlace interno
     return `
-      <a href="${amazonUrl}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+      <a href="libro.html?id=${id}" class="card" style="text-decoration: none; color: inherit;">
         <img src="${portada}" alt="Portada libro">
         <h3>${titulo}</h3>
         <p><strong>${autor}</strong></p>
