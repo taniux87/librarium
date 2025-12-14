@@ -4,22 +4,8 @@
   <meta charset="UTF-8">
   <title>Libro – Librarium.es</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="css/estilos.css">
   <meta name="description" content="Ficha completa del libro con valoración, resumen y detalles.">
-  <style>
-    /* Estilos mínimos si falta el CSS */
-    body{font-family:system-ui,Segoe UI,Roboto,Arial;line-height:1.5;margin:0;background:#f7f7f7;color:#222}
-    .container{max-width:980px;margin:20px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
-    .header, .footer{background:transparent}
-    .grid{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
-    .cover{width:200px;flex:0 0 200px}
-    .cover img{width:100%;border-radius:4px;display:block}
-    .meta h1{margin:0 0 8px;font-size:1.6rem}
-    .meta p{margin:6px 0;color:#555}
-    .btn-secondary{display:inline-block;padding:10px 16px;background:#ff9900;color:#111;border-radius:6px;text-decoration:none;font-weight:600}
-    .small{font-size:.9rem;color:#666;margin-top:8px}
-    .hero .container{padding:40px}
-  </style>
 </head>
 
 <body>
@@ -67,146 +53,106 @@
 </footer>
 
 <script>
-/*
-  Versión corregida de libro.html
-  - Usa ISBN (si existe) para construir enlace directo a Amazon
-  - Si no hay ISBN, construye búsqueda en Amazon con título+autor
-  - Reemplaza scraping a Amazon (evita CORS y errores)
-  - Normaliza imágenes a https
-  - Reemplaza ruta CSS por absoluta (/css/estilos.css)
-  - Sustituye TU_AFFILIATE_TAG por tu tag real
-*/
+  // Tu tag de afiliado (ya proporcionado)
+  const AFFILIATE_TAG = "librarium01-21";
 
-const AFFILIATE_TAG = "librarium01-21"; // <-- reemplaza por tu tag real si es distinto
-
-function asegurarHttps(url) {
-  if (!url) return url;
-  return url.replace(/^http:\/\//i, "https://");
-}
-
-function escapeHtml(text) {
-  if (text === null || text === undefined) return "";
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function generarEstrellas(rating) {
-  const r = Number(rating) || 0;
-  const estrellas = Math.round(r);
-  return "⭐".repeat(Math.max(0, Math.min(5, estrellas))) + ` (${r}/5)`;
-}
-
-function ratingAlternativo(titulo) {
-  let seed = 0;
-  for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
-  const random = (seed % 13) / 10;
-  const rating = 3.5 + random;
-  return Number(rating.toFixed(1));
-}
-
-function construirAmazonUrl(isbn13, title, author) {
-  if (isbn13) {
-    // Enlace directo por ISBN (funciona bien en Amazon)
-    return `https://www.amazon.es/dp/${encodeURIComponent(isbn13)}?tag=${encodeURIComponent(AFFILIATE_TAG)}`;
-  }
-  // Búsqueda por título + autor como fallback
-  const q = encodeURIComponent(`${title} ${author || ""}`.trim());
-  return `https://www.amazon.es/s?k=${q}&tag=${encodeURIComponent(AFFILIATE_TAG)}`;
-}
-
-async function fetchVolumeById(id) {
-  const url = `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Error al obtener datos de Google Books");
-  return await res.json();
-}
-
-function obtenerISBN(info) {
-  if (!info || !Array.isArray(info.industryIdentifiers)) return null;
-  let isbn13 = null;
-  for (const id of info.industryIdentifiers) {
-    if (id.type === "ISBN_13") { isbn13 = id.identifier; break; }
-    if (!isbn13 && id.type === "ISBN_10") isbn13 = id.identifier; // fallback
-  }
-  return isbn13;
-}
-
-function renderNotFound() {
-  document.getElementById("contenidoLibro").innerHTML = `
-    <div style="text-align:center;padding:30px">
-      <h2>No se encontró el libro</h2>
-      <p>Comprueba que la URL incluye <code>?id=VOLUME_ID</code>.</p>
-      <p><a href="index.html">Volver al inicio</a></p>
-    </div>
-  `;
-}
-
-function renderVolume(data) {
-  const info = data.volumeInfo || {};
-  const title = info.title || "Título no disponible";
-  const authors = info.authors ? info.authors.join(", ") : "Autor desconocido";
-  const portadaRaw = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || "img/ejemplo.jpg";
-  const portada = asegurarHttps(portadaRaw);
-  const description = info.description || info.subtitle || "Sin descripción disponible.";
-  const rating = info.averageRating ? Number(info.averageRating) : ratingAlternativo(title);
-  const isbn13 = obtenerISBN(info);
-  const amazonUrl = construirAmazonUrl(isbn13, title, authors);
-
-  // Construir HTML de forma segura: escape de texto plano
-  const html = `
-    <div class="grid">
-      <div class="cover"><img src="${escapeHtml(portada)}" alt="Portada de ${escapeHtml(title)}"></div>
-      <div class="meta">
-        <h1>${escapeHtml(title)}</h1>
-        <p><strong>Autor</strong>: ${escapeHtml(authors)}</p>
-        <p>${generarEstrellas(rating)}</p>
-        <div class="buy" style="margin-top:12px">
-          <a id="buyBtn" class="btn-secondary" href="${encodeURIComponent(amazonUrl).startsWith('https%3A') ? amazonUrl : amazonUrl}" target="_blank" rel="noopener noreferrer">Comprar en Amazon</a>
-          <div class="small">Si el enlace no abre el producto exacto, prueba a buscar por título en Amazon.</div>
-        </div>
-      </div>
-    </div>
-
-    <hr style="margin:18px 0">
-
-    <section>
-      <h3>Descripción</h3>
-      <div id="desc">${escapeHtml(description)}</div>
-    </section>
-  `;
-
-  document.getElementById("contenidoLibro").innerHTML = html;
-  document.getElementById("tituloHero").textContent = title;
-}
-
-(async function init() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
-  if (!id) {
-    renderNotFound();
-    return;
+  // ✅ Estrellas visuales (ligera corrección para evitar errores si rating es undefined)
+  function generarEstrellas(rating) {
+    const r = Number(rating) || 0;
+    const estrellas = Math.round(r);
+    return "⭐".repeat(Math.max(0, Math.min(5, estrellas))) + ` (${r}/5)`;
   }
 
-  try {
-    const data = await fetchVolumeById(id);
-    if (!data || data.error) {
-      renderNotFound();
+  // ✅ Rating alternativo si Google no tiene
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    const random = (seed % 13) / 10;
+    const rating = 3.5 + random;
+    return rating.toFixed(1);
+  }
+
+  // ✅ Buscar ASIN automáticamente en Amazon (nota: scraping puede fallar por CORS; se usa solo como intento)
+  async function buscarASIN(titulo) {
+    try {
+      const query = encodeURIComponent(titulo + " libro");
+      const url = `https://www.amazon.es/s?k=${query}`;
+      const res = await fetch(url);
+      const html = await res.text();
+      const asinMatch = html.match(/\/dp\/([A-Z0-9]{10})/);
+      if (asinMatch) return asinMatch[1];
+    } catch (e) {
+      console.log("Error buscando ASIN:", e);
+    }
+    return null;
+  }
+
+  // Helper: normalizar https en portadas
+  function asegurarHttps(url) {
+    if (!url) return url;
+    return url.replace(/^http:\/\//i, "https://");
+  }
+
+  // ✅ Cargar datos del libro desde Google Books
+  async function cargarLibro() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const asinParam = params.get("asin"); // si el ASIN se pasa por la URL, lo usamos directamente
+
+    if (!id) {
+      document.getElementById("contenidoLibro").innerHTML = "<p>Error: libro no encontrado.</p>";
       return;
     }
-    renderVolume(data);
-  } catch (e) {
-    console.error(e);
-    document.getElementById("contenidoLibro").innerHTML = `
-      <div style="text-align:center;padding:30px">
-        <h2>Error al cargar el libro</h2>
-        <p>No se pudo obtener la información. Inténtalo de nuevo más tarde.</p>
-        <p><a href="index.html">Volver al inicio</a></p>
-      </div>
-    `;
+
+    try {
+      const url = `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const info = data.volumeInfo || {};
+
+      const titulo = info.title || "Título no disponible";
+      const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+      const portada = asegurarHttps(info.imageLinks?.thumbnail || "img/ejemplo.jpg");
+      const descripcion = info.description || "Sin descripción disponible.";
+      const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+
+      document.getElementById("tituloHero").textContent = titulo;
+
+      // Si el ASIN viene por la URL lo usamos; si no, intentamos buscarlo (puede fallar por CORS)
+      let asin = asinParam || null;
+      if (!asin) {
+        asin = await buscarASIN(titulo);
+      }
+
+      // Construir enlace Amazon: si hay ASIN usamos /dp/ASIN, si no, búsqueda por título+autor con tag
+      const enlaceAmazon = asin
+        ? `https://www.amazon.es/dp/${encodeURIComponent(asin)}?tag=${encodeURIComponent(AFFILIATE_TAG)}`
+        : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${encodeURIComponent(AFFILIATE_TAG)}`;
+
+      document.getElementById("contenidoLibro").innerHTML = `
+        <div class="card" style="max-width: 700px; margin: auto; display:flex; gap:20px; align-items:flex-start;">
+          <div style="flex:0 0 200px;">
+            <img src="${portada}" alt="Portada libro" style="width:100%; border-radius:6px;">
+          </div>
+          <div style="flex:1;">
+            <h3 style="margin-top:0;">${titulo}</h3>
+            <p><strong>${autor}</strong></p>
+            <p>${generarEstrellas(rating)}</p>
+            <p>${descripcion}</p>
+
+            <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:12px;padding:10px 14px;background:#ff9900;color:#111;border-radius:6px;text-decoration:none;font-weight:600;">
+              Ver en Amazon
+            </a>
+          </div>
+        </div>
+      `;
+    } catch (e) {
+      console.error("Error cargando libro:", e);
+      document.getElementById("contenidoLibro").innerHTML = "<p>Error al cargar los datos del libro.</p>";
+    }
   }
-})();
+
+  cargarLibro();
 </script>
 
 </body>
