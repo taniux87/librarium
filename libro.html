@@ -53,17 +53,14 @@
 </footer>
 
 <script>
-  // Tu tag de afiliado (ya proporcionado)
   const AFFILIATE_TAG = "librarium01-21";
 
-  // ✅ Estrellas visuales (ligera corrección para evitar errores si rating es undefined)
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
     const estrellas = Math.round(r);
     return "⭐".repeat(Math.max(0, Math.min(5, estrellas))) + ` (${r}/5)`;
   }
 
-  // ✅ Rating alternativo si Google no tiene
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
@@ -72,7 +69,6 @@
     return rating.toFixed(1);
   }
 
-  // ✅ Buscar ASIN automáticamente en Amazon (nota: scraping puede fallar por CORS; se usa solo como intento)
   async function buscarASIN(titulo) {
     try {
       const query = encodeURIComponent(titulo + " libro");
@@ -87,17 +83,15 @@
     return null;
   }
 
-  // Helper: normalizar https en portadas
   function asegurarHttps(url) {
     if (!url) return url;
     return url.replace(/^http:\/\//i, "https://");
   }
 
-  // ✅ Cargar datos del libro desde Google Books
   async function cargarLibro() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-    const asinParam = params.get("asin"); // si el ASIN se pasa por la URL, lo usamos directamente
+    const asinParam = params.get("asin");
 
     if (!id) {
       document.getElementById("contenidoLibro").innerHTML = "<p>Error: libro no encontrado.</p>";
@@ -118,16 +112,12 @@
 
       document.getElementById("tituloHero").textContent = titulo;
 
-      // Si el ASIN viene por la URL lo usamos; si no, intentamos buscarlo (puede fallar por CORS)
       let asin = asinParam || null;
-      if (!asin) {
-        asin = await buscarASIN(titulo);
-      }
+      if (!asin) asin = await buscarASIN(titulo);
 
-      // Construir enlace Amazon: si hay ASIN usamos /dp/ASIN, si no, búsqueda por título+autor con tag
       const enlaceAmazon = asin
-        ? `https://www.amazon.es/dp/${encodeURIComponent(asin)}?tag=${encodeURIComponent(AFFILIATE_TAG)}`
-        : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${encodeURIComponent(AFFILIATE_TAG)}`;
+        ? `https://www.amazon.es/dp/${asin}?tag=${AFFILIATE_TAG}`
+        : `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
 
       document.getElementById("contenidoLibro").innerHTML = `
         <div class="card" style="max-width: 700px; margin: auto; display:flex; gap:20px; align-items:flex-start;">
