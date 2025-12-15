@@ -12,8 +12,10 @@
 
 <body>
 
+  <!-- ✅ HEADER UNIFICADO -->
   <header class="header">
     <div class="container header-flex">
+
       <div class="logo-box">
         <span class="logo-icon">📚</span>
         <span class="logo-text">Librarium.es</span>
@@ -25,15 +27,19 @@
         <a href="rankings.html">Rankings</a>
         <a href="resenas.html">Reseñas</a>
         <a href="contacto.html">Contacto</a>
-        <div class="search-box">
-  <form action="buscar.html" method="GET">
-    <input type="text" name="q" placeholder="Buscar libros..." required>
-    <button type="submit">🔍</button>
-  </form>
-</div>
       </nav>
+
+      <!-- ✅ BUSCADOR SIEMPRE EN EL MISMO SITIO -->
+      <div class="search-box">
+        <form action="buscar.html" method="GET">
+          <input type="text" name="q" placeholder="Buscar libros..." required>
+          <button type="submit">🔍</button>
+        </form>
+      </div>
+
     </div>
   </header>
+  <!-- ✅ FIN HEADER -->
 
 
   <section class="hero" style="background-image: url('img/hero.png');">
@@ -119,7 +125,6 @@
     return null;
   }
 
-  /* ✅ FUNCIÓN HÍBRIDA DE PORTADAS */
   function portadaLibro(info) {
     const isbn = obtenerISBN(info);
     if (isbn) {
@@ -131,9 +136,8 @@
     return "img/ejemplo.jpg";
   }
 
-  /* ✅ AHORA LAS TARJETAS LLEVAN A LIBRO.HTML */
   function crearCard(item) {
-    const id = item.id; // ID de Google Books
+    const id = item.id;
     const info = item.volumeInfo || {};
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
@@ -142,7 +146,6 @@
 
     const portada = portadaLibro(info);
 
-    // Enlace interno a tu página de detalle
     return `
       <a href="libro.html?id=${id}" class="card" style="text-decoration: none; color: inherit;">
         <img src="${portada}" alt="Portada libro">

@@ -10,8 +10,10 @@
 
 <body>
 
+<!-- ✅ HEADER UNIFICADO -->
 <header class="header">
   <div class="container header-flex">
+
     <div class="logo-box">
       <span class="logo-icon">📚</span>
       <span class="logo-text">Librarium.es</span>
@@ -24,8 +26,19 @@
       <a href="resenas.html">Reseñas</a>
       <a href="contacto.html">Contacto</a>
     </nav>
+
+    <!-- ✅ BUSCADOR UNIFICADO -->
+    <div class="search-box">
+      <form action="buscar.html" method="GET">
+        <input type="text" name="q" placeholder="Buscar libros..." required>
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+
   </div>
 </header>
+<!-- ✅ FIN HEADER -->
+
 
 <section class="hero" style="background-image: url('img/hero.png');">
   <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
@@ -97,21 +110,17 @@
       asinData = await res.json();
     } catch (e) {
       console.error("No se pudo cargar o parsear asin.json. Usando enlaces de respaldo.", e);
-      asinData = {}; // Asegura que quede vacío si falla
+      asinData = {}; 
     }
   }
 
-  /* ✅ GENERADOR DE ENLACE AMAZON FINAL: ASIN (por Título) o BÚSQUEDA */
+  /* ✅ GENERADOR DE ENLACE AMAZON FINAL */
   function generarEnlaceAmazon(titulo, autor) {
-    // 1. Prioridad: Buscar el TÍTULO en la data cargada (ASIN)
-    // Usamos .trim() para asegurar que no hay espacios extra en el título
     const tituloLimpio = titulo.trim();
     if (asinData[tituloLimpio]) {
       const asin = asinData[tituloLimpio];
       return `https://www.amazon.es/dp/${asin}?tag=${AFFILIATE_TAG}`;
     }
-
-    // 2. Opción de fallback: Búsqueda por palabras clave (siempre funciona)
     const query = encodeURIComponent(`${tituloLimpio} ${autor}`);
     return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
@@ -140,10 +149,7 @@
 
       document.getElementById("tituloHero").textContent = titulo;
 
-      const isbn = obtenerISBN(info); // Mantenemos el ISBN para la portada
       const portada = portadaLibro(info);
-      
-      // Generamos el enlace usando la nueva lógica (ASIN o Búsqueda)
       const enlaceAmazon = generarEnlaceAmazon(titulo, autor);
 
       document.getElementById("contenidoLibro").innerHTML = `
