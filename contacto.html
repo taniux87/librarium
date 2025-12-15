@@ -44,7 +44,7 @@
       box-shadow: 0 0 4px rgba(10,61,98,0.3);
     }
 
-    /* ✅ BOTÓN IGUAL QUE RANKINGS */
+    /* ✅ BOTÓN */
     .btn {
       padding: 12px 20px;
       background: #0A3D62;
@@ -60,6 +60,35 @@
 
     .btn:hover {
       background: #082f4a;
+    }
+
+    /* ✅ MENSAJES (fade-in / fade-out) */
+    .alert {
+      display: none;
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .alert.show {
+      display: block;
+      opacity: 1;
+    }
+
+    .alert.success {
+      background: #C9E8C9;
+      color: #0A3D62;
+      border: 1px solid #8BC48B;
+    }
+
+    .alert.error {
+      background: #F8D7DA;
+      color: #842029;
+      border: 1px solid #F5C2C7;
     }
   </style>
 </head>
@@ -101,18 +130,22 @@
     <section class="section">
       <h2>Envíanos un mensaje</h2>
 
-     <form class="contact-form" id="contactForm">
+      <form class="contact-form" id="contactForm">
 
         <label>Nombre</label>
-        <input type="text" name="nombre" required>
+        <input type="text" id="nombre" name="nombre">
 
         <label>Email</label>
-        <input type="email" name="email" required>
+        <input type="email" id="email" name="email">
 
         <label>Mensaje</label>
-        <textarea name="mensaje" rows="6" required></textarea>
+        <textarea id="mensaje" name="mensaje" rows="6"></textarea>
 
         <button type="submit" class="btn">Enviar mensaje</button>
+
+        <!-- ✅ Mensajes -->
+        <p id="msgError" class="alert error">⚠️ Por favor, completa todos los campos correctamente.</p>
+        <p id="msgOk" class="alert success">✅ Mensaje enviado correctamente. Gracias por contactarnos.</p>
 
       </form>
 
@@ -131,6 +164,39 @@
       </div>
     </div>
   </footer>
+
+<script>
+  const form = document.getElementById("contactForm");
+  const msgOk = document.getElementById("msgOk");
+  const msgError = document.getElementById("msgError");
+
+  function showMessage(el) {
+    el.classList.add("show");
+    setTimeout(() => {
+      el.classList.remove("show");
+    }, 3500);
+  }
+
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById("nombre").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mensaje = document.getElementById("mensaje").value.trim();
+
+    // ✅ Validación avanzada
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (nombre.length < 2 || !emailRegex.test(email) || mensaje.length < 5) {
+      showMessage(msgError);
+      return;
+    }
+
+    // ✅ Si todo está bien → mensaje enviado
+    form.reset();
+    showMessage(msgOk);
+  });
+</script>
 
 </body>
 </html>
