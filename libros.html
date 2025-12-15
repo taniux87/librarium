@@ -5,7 +5,7 @@
   <title>Libros – Librarium.es</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/estilos.css">
-  <meta name="description" content="Explora libros por edades, categorías y tipos. Catálogo completo con paginación y acceso directo a Amazon.">
+  <meta name="description" content="Catálogo completo de libros por edades, géneros, editoriales y niveles educativos. Explora y salta directamente a Amazon con un clic.">
 </head>
 
 <body>
@@ -41,34 +41,35 @@
 <section class="hero" style="background-image: url('img/hero.png');">
   <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
     <h2 style="color: #fff; font-size: 2.2rem;">Catálogo de Libros</h2>
-    <p style="color: #ddd; font-size: 1.1rem;">Explora libros por edades, categorías y tipos.</p>
+    <p style="color: #ddd; font-size: 1.1rem;">Explora libros por edades, géneros, editoriales y niveles educativos, y salta directamente a Amazon.</p>
   </div>
 </section>
 
 <main class="container">
 
-  <!-- ✅ PESTAÑAS -->
+  <!-- ✅ PESTAÑAS PRINCIPALES -->
   <section class="section">
     <div class="tabs">
-      <button class="tab active" data-cat="infantil">Infantil</button>
-      <button class="tab" data-cat="0a3">0–3 años</button>
-      <button class="tab" data-cat="3a5">3–5 años</button>
-      <button class="tab" data-cat="6a8">6–8 años</button>
-      <button class="tab" data-cat="9a12">9–12 años</button>
-      <button class="tab" data-cat="12a16">12–16 años</button>
-      <button class="tab" data-cat="educativos">Educativos</button>
-      <button class="tab" data-cat="actividades">Actividades</button>
-      <button class="tab" data-cat="texto">Libros de texto</button>
+      <button class="tab active" data-main="infantil">Infantil</button>
+      <button class="tab" data-main="generos">Géneros</button>
+      <button class="tab" data-main="edades">Edades</button>
+      <button class="tab" data-main="editoriales">Editoriales</button>
+      <button class="tab" data-main="texto">Libros de texto</button>
     </div>
   </section>
 
-  <!-- ✅ CONTENEDOR DE RESULTADOS -->
+  <!-- ✅ SUBPESTAÑAS DINÁMICAS -->
+  <section class="section">
+    <div id="subtabs" class="tabs small-tabs"></div>
+  </section>
+
+  <!-- ✅ RESULTADOS + PAGINACIÓN -->
   <section class="section">
     <div id="resultados" class="grid"></div>
 
-    <div id="paginacion" style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+    <div id="paginacion" style="display:flex; justify-content:center; gap:10px; margin-top:20px; align-items:center;">
       <button id="btnAnterior" disabled>Anterior</button>
-      <span id="infoPagina"></span>
+      <span id="infoPagina" style="font-size:0.9rem; color:#555;"></span>
       <button id="btnSiguiente" disabled>Siguiente</button>
     </div>
   </section>
@@ -87,117 +88,206 @@
 </footer>
 
 <script>
-/* ✅ CONFIGURACIÓN */
-const AFFILIATE_TAG = "librarium01-21";
-const MAX_RESULTS = 12;
-let paginaActual = 0;
-let categoriaActual = "infantil";
+  /* ✅ CONFIGURACIÓN GENERAL */
+  const AFFILIATE_TAG = "librarium01-21";
+  const MAX_RESULTS = 12; // libros por página
 
-/* ✅ CONSULTAS POR CATEGORÍA */
-const QUERIES = {
-  infantil: "libros infantiles cuentos",
-  "0a3": "libros bebes 0 3 años cuentos",
-  "3a5": "cuentos ilustrados 3 5 años",
-  "6a8": "primeros lectores 6 8 años",
-  "9a12": "libros infantiles 9 12 años aventuras",
-  "12a16": "libros juvenil 12 16 años",
-  educativos: "libros educativos primaria",
-  actividades: "cuadernos actividades niños",
-  texto: "libros texto primaria santillana sm anaya"
-};
+  let paginaActual = 0;
+  let categoriaActual = "";
+  let subcategoriaActual = "";
 
-/* ✅ FUNCIONES BASE */
-function generarEstrellas(rating) {
-  const r = Number(rating) || 0;
-  return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
-}
+  /* ✅ DEFINICIÓN DE SUBPESTAÑAS Y QUERIES POR CATEGORÍA PRINCIPAL */
 
-function ratingAlternativo(titulo) {
-  let seed = 0;
-  for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
-  return (3.5 + (seed % 13) / 10).toFixed(1);
-}
+  const SUBTABS = {
+    infantil: {
+      "0–3 años": "libros bebes 0 3 años cuentos",
+      "3–5 años": "cuentos ilustrados 3 5 años",
+      "6–8 años": "primeros lectores 6 8 años",
+      "9–12 años": "libros infantiles 9 12 años aventuras",
+      "12–16 años": "libros juvenil 12 16 años"
+    },
 
-async function buscarLibros(query, page = 0) {
-  const startIndex = page * MAX_RESULTS;
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${MAX_RESULTS}&startIndex=${startIndex}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return {
-    items: data.items || [],
-    total: data.totalItems || 0
+    generos: {
+      "Fantasía": "libros fantasia novelas",
+      "Terror": "libros terror miedo",
+      "Romance": "libros romance amor",
+      "Thriller": "libros thriller suspense",
+      "Sci-Fi": "libros ciencia ficcion",
+      "Misterio": "libros misterio detectives",
+      "Juvenil": "libros juvenil aventuras",
+      "No ficción": "libros no ficcion divulgacion"
+    },
+
+    edades: {
+      "0–3 años": "libros bebes 0 3 años",
+      "3–5 años": "libros 3 5 años",
+      "6–8 años": "libros 6 8 años",
+      "9–12 años": "libros 9 12 años",
+      "12–16 años": "libros 12 16 años",
+      "Adultos": "libros adultos novelas"
+    },
+
+    editoriales: {
+      "SM": "libros editorial sm",
+      "Santillana": "libros editorial santillana",
+      "Anaya": "libros editorial anaya",
+      "Planeta": "libros editorial planeta",
+      "Alfaguara": "libros editorial alfaguara"
+    },
+
+    texto: {
+      "Infantil": "libros texto infantil",
+      "Primaria": "libros texto primaria",
+      "Secundaria": "libros texto secundaria",
+      "Bachillerato": "libros texto bachillerato"
+    }
   };
-}
 
-function portada(info) {
-  const isbn = info.industryIdentifiers?.[0]?.identifier;
-  if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-  if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
-  return "img/ejemplo.jpg";
-}
+  /* ✅ UTILIDADES UI */
 
-function enlaceAmazon(titulo, autor) {
-  const query = encodeURIComponent(`${titulo} ${autor}`);
-  return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
-}
+  function generarEstrellas(rating) {
+    const r = Number(rating) || 0;
+    const estrellas = Math.round(r);
+    return "⭐".repeat(estrellas) + ` (${r}/5)`;
+  }
 
-function card(item) {
-  const info = item.volumeInfo || {};
-  const titulo = info.title || "Título no disponible";
-  const autor = info.authors?.join(", ") || "Autor desconocido";
-  const rating = info.averageRating || ratingAlternativo(titulo);
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    const random = (seed % 13) / 10;
+    return (3.5 + random).toFixed(1);
+  }
 
-  return `
-    <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank">
-      <img src="${portada(info)}">
-      <h3>${titulo}</h3>
-      <p><strong>${autor}</strong></p>
-      <p>${generarEstrellas(rating)}</p>
-    </a>
-  `;
-}
+  async function buscarLibros(query, page = 0) {
+    const startIndex = page * MAX_RESULTS;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${MAX_RESULTS}&startIndex=${startIndex}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return {
+      items: data.items || [],
+      total: data.totalItems || 0
+    };
+  }
 
-/* ✅ CARGAR CATEGORÍA */
-async function cargarCategoria() {
-  const query = QUERIES[categoriaActual];
-  const { items, total } = await buscarLibros(query, paginaActual);
+  function portada(info) {
+    const isbn = info.industryIdentifiers?.[0]?.identifier;
+    if (isbn) {
+      return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    }
+    if (info.imageLinks?.thumbnail) {
+      return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
+    }
+    return "img/ejemplo.jpg";
+  }
 
-  document.getElementById("resultados").innerHTML = items.map(card).join("");
+  function enlaceAmazon(titulo, autor) {
+    const query = encodeURIComponent(`${titulo} ${autor}`);
+    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
+  }
 
-  const totalPaginas = Math.ceil(total / MAX_RESULTS);
-  document.getElementById("infoPagina").textContent = `Página ${paginaActual + 1} de ${totalPaginas}`;
+  function card(item) {
+    const info = item.volumeInfo || {};
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors?.join(", ") || "Autor desconocido";
+    const rating = info.averageRating || ratingAlternativo(titulo);
 
-  document.getElementById("btnAnterior").disabled = paginaActual === 0;
-  document.getElementById("btnSiguiente").disabled = paginaActual >= totalPaginas - 1;
-}
+    return `
+      <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit;">
+        <img src="${portada(info)}" alt="Portada libro">
+        <h3>${titulo}</h3>
+        <p><strong>${autor}</strong></p>
+        <p>${generarEstrellas(rating)}</p>
+      </a>
+    `;
+  }
 
-/* ✅ EVENTOS DE PESTAÑAS */
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
+  /* ✅ CARGAR SUBPESTAÑAS SEGÚN PESTAÑA PRINCIPAL */
 
-    categoriaActual = tab.dataset.cat;
-    paginaActual = 0;
+  function cargarSubtabs() {
+    const cont = document.getElementById("subtabs");
+    cont.innerHTML = "";
+
+    const subtabs = SUBTABS[categoriaActual];
+    const keys = Object.keys(subtabs);
+
+    keys.forEach((nombre, index) => {
+      cont.innerHTML += `
+        <button class="subtab ${index === 0 ? "active" : ""}" data-sub="${nombre}">${nombre}</button>
+      `;
+    });
+
+    subcategoriaActual = keys[0];
+  }
+
+  /* ✅ CARGAR RESULTADOS PARA LA CATEGORÍA + SUBCATEGORÍA ACTUAL */
+
+  async function cargarCategoria() {
+    const subtabs = SUBTABS[categoriaActual];
+    if (!subtabs) return;
+
+    const query = subtabs[subcategoriaActual];
+    if (!query) return;
+
+    const { items, total } = await buscarLibros(query, paginaActual);
+
+    document.getElementById("resultados").innerHTML = items.map(card).join("");
+
+    const totalPaginas = Math.max(1, Math.ceil(total / MAX_RESULTS));
+    document.getElementById("infoPagina").textContent = `Página ${paginaActual + 1} de ${totalPaginas}`;
+
+    document.getElementById("btnAnterior").disabled = paginaActual === 0;
+    document.getElementById("btnSiguiente").disabled = paginaActual >= totalPaginas - 1;
+  }
+
+  /* ✅ EVENTOS: PESTAÑAS PRINCIPALES */
+
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      categoriaActual = tab.dataset.main;
+      paginaActual = 0;
+
+      cargarSubtabs();
+      cargarCategoria();
+    });
+  });
+
+  /* ✅ EVENTOS: SUBPESTAÑAS */
+
+  document.getElementById("subtabs").addEventListener("click", e => {
+    if (e.target.classList.contains("subtab")) {
+      document.querySelectorAll(".subtab").forEach(t => t.classList.remove("active"));
+      e.target.classList.add("active");
+
+      subcategoriaActual = e.target.dataset.sub;
+      paginaActual = 0;
+
+      cargarCategoria();
+    }
+  });
+
+  /* ✅ EVENTOS: PAGINACIÓN */
+
+  document.getElementById("btnAnterior").addEventListener("click", () => {
+    if (paginaActual > 0) {
+      paginaActual--;
+      cargarCategoria();
+    }
+  });
+
+  document.getElementById("btnSiguiente").addEventListener("click", () => {
+    paginaActual++;
     cargarCategoria();
   });
-});
 
-/* ✅ PAGINACIÓN */
-document.getElementById("btnAnterior").addEventListener("click", () => {
-  if (paginaActual > 0) {
-    paginaActual--;
-    cargarCategoria();
-  }
-});
+  /* ✅ CARGA INICIAL */
 
-document.getElementById("btnSiguiente").addEventListener("click", () => {
-  paginaActual++;
+  categoriaActual = "infantil";
+  cargarSubtabs();
   cargarCategoria();
-});
-
-/* ✅ CARGA INICIAL */
-cargarCategoria();
 </script>
+
 </body>
 </html>
