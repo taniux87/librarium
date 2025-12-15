@@ -10,9 +10,10 @@
 
 <body>
 
-  <!-- ✅ HEADER -->
+  <!-- ✅ HEADER UNIFICADO -->
   <header class="header">
     <div class="container header-flex">
+
       <div class="logo-box">
         <span class="logo-icon">📚</span>
         <span class="logo-text">Librarium.es</span>
@@ -25,6 +26,15 @@
         <a href="resenas.html">Reseñas</a>
         <a href="contacto.html">Contacto</a>
       </nav>
+
+      <!-- ✅ BUSCADOR -->
+      <div class="search-box">
+        <form action="buscar.html" method="GET">
+          <input type="text" name="q" placeholder="Buscar libros..." required>
+          <button type="submit">🔍</button>
+        </form>
+      </div>
+
     </div>
   </header>
 
@@ -39,6 +49,7 @@
   <!-- ✅ CONTENIDO PRINCIPAL -->
   <main class="container">
 
+    <!-- ✅ ARTÍCULOS PRINCIPALES -->
     <section class="section">
       <h2>Últimos artículos</h2>
 
@@ -48,6 +59,78 @@
         <a class="list-item" href="articulo3.html">Los mejores libros para empezar a leer fantasía</a>
         <a class="list-item" href="articulo4.html">Cómo crear el hábito de la lectura en 2025</a>
         <a class="list-item" href="articulo5.html">Libros que marcaron una generación</a>
+      </div>
+    </section>
+
+    <!-- ✅ MICRO‑ARTÍCULOS DINÁMICOS -->
+    <section class="section">
+      <h2>Lecturas rápidas</h2>
+
+      <div class="grid">
+
+        <div class="card">
+          <h3>📘 ¿Sabías que…?</h3>
+          <p>El primer borrador de *Harry Potter y la piedra filosofal* fue rechazado por 12 editoriales antes de ser aceptado.</p>
+        </div>
+
+        <div class="card">
+          <h3>🎬 Libros al cine</h3>
+          <p>*Piratas del Caribe* nació como una atracción de Disneyland, pero su universo se expandió con novelas oficiales.</p>
+        </div>
+
+        <div class="card">
+          <h3>📚 Curiosidad literaria</h3>
+          <p>El libro más robado de las bibliotecas públicas es *El guardián entre el centeno* de J.D. Salinger.</p>
+        </div>
+
+        <div class="card">
+          <h3>🧙‍♂️ Fantasía</h3>
+          <p>El mapa de la Tierra Media fue dibujado originalmente por Christopher Tolkien, hijo del autor.</p>
+        </div>
+
+        <div class="card">
+          <h3>🔍 Misterio</h3>
+          <p>Agatha Christie desapareció 11 días en 1926 y nunca explicó qué ocurrió realmente.</p>
+        </div>
+
+        <div class="card">
+          <h3>📖 Romance</h3>
+          <p>Jane Austen publicó sus primeras novelas de forma anónima, firmando solo como “By a Lady”.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ✅ FRASES DE LIBROS LLEVADOS AL CINE -->
+    <section class="section">
+      <h2>Frases que llegaron a la gran pantalla</h2>
+
+      <div class="grid">
+
+        <div class="card">
+          <h3>Harry Potter</h3>
+          <p><em>“La felicidad puede hallarse hasta en los más oscuros momentos, si somos capaces de usar bien la luz.”</em></p>
+          <p style="font-size:0.9rem; color:#555;">— Albus Dumbledore</p>
+        </div>
+
+        <div class="card">
+          <h3>El Señor de los Anillos</h3>
+          <p><em>“No todos los que vagan están perdidos.”</em></p>
+          <p style="font-size:0.9rem; color:#555;">— J.R.R. Tolkien</p>
+        </div>
+
+        <div class="card">
+          <h3>Piratas del Caribe</h3>
+          <p><em>“No es la brújula lo que te guía, sino tu corazón.”</em></p>
+          <p style="font-size:0.9rem; color:#555;">— Jack Sparrow</p>
+        </div>
+
+        <div class="card">
+          <h3>Orgullo y Prejuicio</h3>
+          <p><em>“Me has hechizado en cuerpo y alma.”</em></p>
+          <p style="font-size:0.9rem; color:#555;">— Jane Austen</p>
+        </div>
+
       </div>
     </section>
 
