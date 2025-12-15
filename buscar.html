@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscar libros – Librarium.es</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+
+<header class="header">
+  <div class="container header-flex">
+    <div class="logo-box">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text">Librarium.es</span>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <div class="search-box">
+      <form action="buscar.html" method="GET">
+        <input type="text" name="q" placeholder="Buscar libros..." required>
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="background-image: url('img/hero.png');">
+  <div class="container" style="background: rgba(0,0,0,0.55); padding: 40px 30px; border-radius: 12px;">
+    <h2 style="color: #fff; font-size: 2.2rem;">Resultados de búsqueda</h2>
+  </div>
+</section>
+
+<main class="container">
+  <section class="section">
+    <div id="resultados" class="grid"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Librarium.es – Todos los derechos reservados</p>
+  </div>
+</footer>
+
+<script>
+  const AFFILIATE_TAG = "librarium01-21";
+
+  function generarEstrellas(rating) {
+    const r = Number(rating) || 0;
+    return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
+  }
+
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    return (3.5 + (seed % 13) / 10).toFixed(1);
+  }
+
+  function obtenerISBN(info) {
+    if (!info.industryIdentifiers) return null;
+    for (const id of info.industryIdentifiers) {
+      if (id.type === "ISBN_13") return id.identifier;
+      if (id.type === "ISBN_10") return id.identifier;
+    }
+    return null;
+  }
+
+  function portadaLibro(info) {
+    const isbn = obtenerISBN(info);
+    if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
+    return "img/ejemplo.jpg";
+  }
+
+  function generarEnlaceAmazon(titulo, autor, isbn) {
+    if (isbn) return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
+    return `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
+  }
+
+  function crearCard(item) {
+    const info = item.volumeInfo;
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+    const rating = info.averageRating || ratingAlternativo(titulo);
+    const isbn = obtenerISBN(info);
+    const portada = portadaLibro(info);
+    const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
+
+    return `
+      <a href="${amazonUrl}" class="card" target="_blank" rel="noopener noreferrer">
+        <img src="${portada}" alt="Portada libro">
+        <h3>${titulo}</h3>
+        <p><strong>${autor}</strong></p>
+        <p>${generarEstrellas(rating)}</p>
+      </a>
+    `;
+  }
+
+  async function cargarBusqueda() {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+
+    if (!q) return;
+
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&langRestrict=es&maxResults=20`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const cont = document.getElementById("resultados");
+    cont.innerHTML = "";
+
+    (data.items || []).forEach(item => {
+      cont.innerHTML += crearCard(item);
+    });
+  }
+
+  cargarBusqueda();
+</script>
+
+</body>
+</html>
