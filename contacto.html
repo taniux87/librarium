@@ -172,9 +172,7 @@
 
   function showMessage(el) {
     el.classList.add("show");
-    setTimeout(() => {
-      el.classList.remove("show");
-    }, 3500);
+    setTimeout(() => el.classList.remove("show"), 3500);
   }
 
   form.addEventListener("submit", function(e) {
@@ -184,7 +182,6 @@
     const email = document.getElementById("email").value.trim();
     const mensaje = document.getElementById("mensaje").value.trim();
 
-    // ✅ Validación avanzada
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (nombre.length < 2 || !emailRegex.test(email) || mensaje.length < 5) {
@@ -192,7 +189,12 @@
       return;
     }
 
-    // ✅ Si todo está bien → mensaje enviado
+    /* ✅ Abrir correo del usuario */
+    window.location.href =
+      `mailto:contacto@librarium.es?subject=Mensaje desde Librarium.es&body=` +
+      `Nombre: ${nombre}%0AEmail: ${email}%0A%0AMensaje:%0A${mensaje}`;
+
+    /* ✅ Mostrar mensaje de éxito */
     form.reset();
     showMessage(msgOk);
   });
