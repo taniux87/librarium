@@ -6,6 +6,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/estilos.css">
   <meta name="description" content="Reseñas automáticas de libros con valoraciones, datos y fichas detalladas.">
+
+  <style>
+    /* ✅ Estilos de pestañas */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: #0A3D62;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #082f4a;
+      transition: 0.2s ease;
+      font-weight: 600;
+    }
+
+    .tab-btn:hover {
+      background: #082f4a;
+    }
+
+    .tab-btn.active {
+      background: #C9A86A;
+      color: #111;
+      border-color: #b8955c;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ✅ Paginación */
+    .pagination {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .pagination button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      background: #0A3D62;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .pagination button:hover {
+      background: #082f4a;
+    }
+
+    .pagination button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 
 <body>
@@ -40,15 +106,85 @@
 <section class="hero" style="background-image: url('img/hero.png');">
   <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
     <h2 style="color: #fff; font-size: 2.2rem;">Reseñas de libros</h2>
-    <p style="color: #ddd; font-size: 1.1rem;">Haz clic en cualquier libro para ver su ficha completa.</p>
+    <p style="color: #ddd; font-size: 1.1rem;">Explora reseñas ordenadas por valoración.</p>
   </div>
 </section>
 
 <main class="container">
 
-  <section class="section">
-    <h2>Libros destacados</h2>
-    <div id="resenas" class="grid"></div>
+  <!-- ✅ PESTAÑAS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="fantasia">Fantasía</button>
+    <button class="tab-btn" data-tab="terror">Terror</button>
+    <button class="tab-btn" data-tab="romance">Romance</button>
+    <button class="tab-btn" data-tab="thriller">Thriller</button>
+    <button class="tab-btn" data-tab="scifi">Sci‑Fi</button>
+    <button class="tab-btn" data-tab="misterio">Misterio</button>
+    <button class="tab-btn" data-tab="noficcion">No Ficción</button>
+    <button class="tab-btn" data-tab="juvenil">Juvenil</button>
+    <button class="tab-btn" data-tab="historia">Historia</button>
+    <button class="tab-btn" data-tab="autoayuda">Autoayuda</button>
+  </div>
+
+  <!-- ✅ CONTENIDO DE CADA PESTAÑA -->
+  <section id="fantasia" class="tab-content active">
+    <h2>Fantasía</h2>
+    <div class="grid"></div>
+    <div id="fantasia-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="terror" class="tab-content">
+    <h2>Terror</h2>
+    <div class="grid"></div>
+    <div id="terror-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="romance" class="tab-content">
+    <h2>Romance</h2>
+    <div class="grid"></div>
+    <div id="romance-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="thriller" class="tab-content">
+    <h2>Thriller</h2>
+    <div class="grid"></div>
+    <div id="thriller-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="scifi" class="tab-content">
+    <h2>Ciencia Ficción</h2>
+    <div class="grid"></div>
+    <div id="scifi-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="misterio" class="tab-content">
+    <h2>Misterio</h2>
+    <div class="grid"></div>
+    <div id="misterio-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="noficcion" class="tab-content">
+    <h2>No Ficción</h2>
+    <div class="grid"></div>
+    <div id="noficcion-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="juvenil" class="tab-content">
+    <h2>Juvenil</h2>
+    <div class="grid"></div>
+    <div id="juvenil-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="historia" class="tab-content">
+    <h2>Historia</h2>
+    <div class="grid"></div>
+    <div id="historia-paginacion" class="pagination"></div>
+  </section>
+
+  <section id="autoayuda" class="tab-content">
+    <h2>Autoayuda</h2>
+    <div class="grid"></div>
+    <div id="autoayuda-paginacion" class="pagination"></div>
   </section>
 
 </main>
@@ -71,7 +207,7 @@
     return "⭐".repeat(estrellas) + ` (${rating}/5)`;
   }
 
-  /* ✅ Rating alternativo si Google no tiene */
+  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
@@ -97,25 +233,24 @@
   }
 
   /* ✅ Buscar libros */
-  async function buscarLibros(query, max = 20) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${max}`;
+  async function buscarLibros(query, startIndex = 0, max = 12) {
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&startIndex=${startIndex}&maxResults=${max}`;
     const res = await fetch(url);
     const data = await res.json();
     return data.items || [];
   }
 
-  /* ✅ Tarjeta clicable */
+  /* ✅ Tarjeta */
   function crearCard(item) {
     const info = item.volumeInfo;
     const id = item.id;
     const portada = portadaLibro(info);
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
-
     const rating = info.averageRating || ratingAlternativo(titulo);
 
     return `
-      <a href="libro.html?id=${encodeURIComponent(id)}" class="card" style="text-decoration: none; color: inherit;">
+      <a href="libro.html?id=${encodeURIComponent(id)}" class="card">
         <img src="${portada}" alt="Portada libro">
         <h3>${titulo}</h3>
         <p><strong>${autor}</strong></p>
@@ -124,26 +259,56 @@
     `;
   }
 
-  /* ✅ Cargar lista de reseñas ORDENADAS por rating */
-  async function cargarLista() {
-    const libros = await buscarLibros("mejores libros reseñas críticas literatura", 20);
+  /* ✅ Cargar página con ordenación */
+  async function cargarPagina(id, query, pagina = 1) {
+    const cont = document.querySelector(`#${id} .grid`);
+    const paginacion = document.getElementById(id + "-paginacion");
 
-    // ✅ Ordenar de mayor a menor rating
+    const startIndex = (pagina - 1) * 12;
+    let libros = await buscarLibros(query, startIndex, 12);
+
     libros.sort((a, b) => {
       const rA = a.volumeInfo.averageRating || ratingAlternativo(a.volumeInfo.title);
       const rB = b.volumeInfo.averageRating || ratingAlternativo(b.volumeInfo.title);
       return rB - rA;
     });
 
-    const cont = document.getElementById("resenas");
     cont.innerHTML = "";
+    libros.forEach(item => cont.innerHTML += crearCard(item));
 
-    libros.forEach(item => {
-      cont.innerHTML += crearCard(item);
-    });
+    paginacion.innerHTML = `
+      <button onclick="cargarPagina('${id}', '${query}', ${pagina - 1})" ${pagina === 1 ? "disabled" : ""}>← Anterior</button>
+      <span>Página ${pagina}</span>
+      <button onclick="cargarPagina('${id}', '${query}', ${pagina + 1})">Siguiente →</button>
+    `;
   }
 
-  cargarLista();
+  /* ✅ Cargar todas las categorías */
+  cargarPagina("fantasia", "best fantasy books");
+  cargarPagina("terror", "best horror books");
+  cargarPagina("romance", "best romance novels");
+  cargarPagina("thriller", "best thriller books");
+
+  cargarPagina("scifi", "best science fiction books");
+  cargarPagina("misterio", "best mystery books");
+  cargarPagina("noficcion", "best nonfiction books");
+  cargarPagina("juvenil", "best young adult books");
+  cargarPagina("historia", "best history books");
+  cargarPagina("autoayuda", "best self help books");
+
+  /* ✅ Lógica de pestañas */
+  const tabs = document.querySelectorAll(".tab-btn");
+  const contents = document.querySelectorAll(".tab-content");
+
+  tabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabs.forEach(b => b.classList.remove("active"));
+      contents.forEach(c => c.classList.remove("active"));
+
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    });
+  });
 </script>
 
 </body>
