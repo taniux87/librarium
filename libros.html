@@ -12,36 +12,45 @@
 
 <header class="header">
   <div class="container header-flex">
+
     <div class="logo-box">
       <span class="logo-icon">📚</span>
       <span class="logo-text">Librarium.es</span>
     </div>
 
     <nav class="menu">
-        <a href="index.html" class="active">Inicio</a>
-        <a href="blog.html">Blog</a>
-        <a href="libros.html">Libros</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="resenas.html">Reseñas</a>
-        <a href="contacto.html">Contacto</a>
-      </nav>
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="libros.html" class="active">Libros</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <div class="search-box">
+      <form action="buscar.html" method="GET">
+        <input type="text" name="q" placeholder="Buscar libros..." required>
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+
   </div>
 </header>
 
 <section class="hero" style="background-image: url('img/hero.png');">
   <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
     <h2 style="color: #fff; font-size: 2.2rem;">Libros</h2>
-    <p style="color: #ddd; font-size: 1.1rem;">Explora libros por categorías, edades, géneros y más.</p>
+    <p style="color: #ddd; font-size: 1.1rem;">Explora libros y salta directamente a Amazon con un clic.</p>
   </div>
 </section>
 
 <main class="container">
 
-  <!-- BUSCADOR -->
+  <!-- BUSCADOR CON FILTROS Y PAGINACIÓN -->
   <section class="section">
     <h2>Buscador avanzado</h2>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
       <input id="busqueda" type="text" placeholder="Buscar por título, autor o ISBN" style="flex:1; padding:10px;">
       <select id="filtro" style="padding:10px;">
         <option value="todo">Todos</option>
@@ -49,13 +58,19 @@
         <option value="autor">Autor</option>
         <option value="isbn">ISBN</option>
       </select>
-      <button onclick="buscar()" style="padding:10px 20px;">Buscar</button>
+      <button id="btnBuscar" style="padding:10px 20px;">Buscar</button>
     </div>
 
     <div id="resultados" class="grid" style="margin-top:20px;"></div>
+
+    <div id="paginacion" style="display:flex; justify-content:center; gap:10px; margin-top:20px; align-items:center;">
+      <button id="btnAnterior" style="padding:6px 12px;" disabled>Anterior</button>
+      <span id="infoPagina" style="font-size:0.9rem; color:#555;"></span>
+      <button id="btnSiguiente" style="padding:6px 12px;" disabled>Siguiente</button>
+    </div>
   </section>
 
-  <!-- CATEGORÍAS -->
+  <!-- CATEGORÍAS PRINCIPALES (ENLACES A OTRAS PÁGINAS) -->
   <section class="section">
     <h2>Categorías principales</h2>
     <div class="list">
@@ -82,6 +97,10 @@
 
 <script>
   const AFFILIATE_TAG = "librarium01-21";
+  const MAX_RESULTS = 12;      // libros por página
+  let paginaActual = 0;        // empieza en 0
+  let ultimaConsulta = "";     // query base (sin startIndex)
+  let ultimoFiltro = "todo";   // filtro usado
 
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
@@ -96,11 +115,15 @@
     return (3.5 + random).toFixed(1);
   }
 
-  async function buscarLibros(query, max = 12) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${max}`;
+  async function buscarLibros(query, page = 0) {
+    const startIndex = page * MAX_RESULTS;
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${MAX_RESULTS}&startIndex=${startIndex}`;
     const res = await fetch(url);
     const data = await res.json();
-    return data.items || [];
+    return {
+      items: data.items || [],
+      total: data.totalItems || 0
+    };
   }
 
   function portada(info) {
@@ -116,14 +139,14 @@
   }
 
   function card(item) {
-    const info = item.volumeInfo;
-    const titulo = info.title;
+    const info = item.volumeInfo || {};
+    const titulo = info.title || "Título no disponible";
     const autor = info.authors?.join(", ") || "Autor desconocido";
     const rating = info.averageRating || ratingAlternativo(titulo);
 
     return `
-      <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank" rel="noopener noreferrer">
-        <img src="${portada(info)}">
+      <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit;">
+        <img src="${portada(info)}" alt="Portada libro">
         <h3>${titulo}</h3>
         <p><strong>${autor}</strong></p>
         <p>${generarEstrellas(rating)}</p>
@@ -131,21 +154,54 @@
     `;
   }
 
-  async function buscar() {
+  async function ejecutarBusqueda() {
     const texto = document.getElementById("busqueda").value.trim();
     const filtro = document.getElementById("filtro").value;
 
-    if (!texto) return;
+    if (!texto && !ultimaConsulta) return;
 
-    let query = texto;
-    if (filtro === "titulo") query = `intitle:${texto}`;
-    if (filtro === "autor") query = `inauthor:${texto}`;
-    if (filtro === "isbn") query = `isbn:${texto}`;
+    // Si hay texto nuevo, reseteamos a página 0
+    if (texto) {
+      paginaActual = 0;
+      ultimoFiltro = filtro;
+      if (filtro === "titulo") ultimaConsulta = `intitle:${texto}`;
+      else if (filtro === "autor") ultimaConsulta = `inauthor:${texto}`;
+      else if (filtro === "isbn") ultimaConsulta = `isbn:${texto}`;
+      else ultimaConsulta = texto;
+    }
 
-    const libros = await buscarLibros(query);
+    const { items, total } = await buscarLibros(ultimaConsulta, paginaActual);
     const cont = document.getElementById("resultados");
-    cont.innerHTML = libros.map(card).join("");
+    cont.innerHTML = items.map(card).join("");
+
+    // paginación
+    const totalPaginas = Math.ceil(total / MAX_RESULTS);
+    const info = document.getElementById("infoPagina");
+    const btnAnt = document.getElementById("btnAnterior");
+    const btnSig = document.getElementById("btnSiguiente");
+
+    if (totalPaginas === 0) {
+      info.textContent = "Sin resultados.";
+      btnAnt.disabled = true;
+      btnSig.disabled = true;
+    } else {
+      info.textContent = `Página ${paginaActual + 1} de ${totalPaginas}`;
+      btnAnt.disabled = paginaActual === 0;
+      btnSig.disabled = paginaActual >= totalPaginas - 1;
+    }
   }
+
+  document.getElementById("btnBuscar").addEventListener("click", ejecutarBusqueda);
+  document.getElementById("btnAnterior").addEventListener("click", () => {
+    if (paginaActual > 0) {
+      paginaActual--;
+      ejecutarBusqueda();
+    }
+  });
+  document.getElementById("btnSiguiente").addEventListener("click", () => {
+    paginaActual++;
+    ejecutarBusqueda();
+  });
 </script>
 
 </body>
