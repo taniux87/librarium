@@ -146,7 +146,7 @@ body {
    SECCIONES
 -------------------------------------------------- */
 .section {
-  margin: 60px 0;
+  margin: 35px 0;
 }
 
 .section h2 {
@@ -432,6 +432,43 @@ body {
   font-weight: 600;
   text-decoration: none;
   transition: 0.2s ease;
+}
+
+.bloque-seo a:hover {
+  color: #C9A86A;
+}
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #C9A86A;
+  box-shadow: 0 2px 8px rgba(201,168,106,0.25);
+  transition: 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 14px rgba(201,168,106,0.35);
+}
+.bloque-seo {
+  background: #FDF8EE;
+  border: 1px solid #C9A86A;
+  padding: 25px 30px;
+  border-radius: 12px;
+  margin: 35px auto;
+  max-width: 900px;
+  box-shadow: 0 2px 6px rgba(201,168,106,0.25);
+}
+
+.bloque-seo h2 {
+  color: #0A3D62;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+
+.bloque-seo a {
+  color: #0A3D62;
+  font-weight: 600;
 }
 
 .bloque-seo a:hover {
