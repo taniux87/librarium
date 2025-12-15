@@ -671,7 +671,7 @@ p {
 .top-intro {
   background: #000; /* fondo negro */
   color: #C9A86A; /* dorado */
-  padding: 40px 20px;
+  padding: 20px 20px;
   text-align: center;
   font-family: 'Merriweather', serif;
   border-bottom: 2px solid #C9A86A;
@@ -691,4 +691,11 @@ p {
   max-width: 900px;
   margin: auto;
   line-height: 1.7;
+}
+/* ✅ BOTÓN ACTIVO DEL MENÚ CON RECUADRO DORADO */
+.menu .active {
+  color: #C9A86A !important;
+  border: 2px solid #C9A86A;
+  padding: 6px 12px;
+  border-radius: 8px;
 }
