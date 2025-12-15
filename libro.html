@@ -1,88 +1,32 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Libro – Librarium.es</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/estilos.css">
-  <meta name="description" content="Ficha completa del libro con valoración, resumen y detalles.">
-</head>
-
-<body>
-
-<!-- ✅ HEADER UNIFICADO -->
-<header class="header">
-  <div class="container header-flex">
-
-    <div class="logo-box">
-      <span class="logo-icon">📚</span>
-      <span class="logo-text">Librarium.es</span>
-    </div>
-
-    <nav class="menu">
-      <a href="index.html">Inicio</a>
-      <a href="blog.html">Blog</a>
-      <a href="rankings.html">Rankings</a>
-      <a href="resenas.html">Reseñas</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
-
-    <!-- ✅ BUSCADOR UNIFICADO -->
-    <div class="search-box">
-      <form action="buscar.html" method="GET">
-        <input type="text" name="q" placeholder="Buscar libros..." required>
-        <button type="submit">🔍</button>
-      </form>
-    </div>
-
-  </div>
-</header>
-<!-- ✅ FIN HEADER -->
-
-
-<section class="hero" style="background-image: url('img/hero.png');">
-  <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
-    <h2 id="tituloHero" style="color: #fff; font-size: 2.2rem;">Cargando...</h2>
-  </div>
-</section>
-
-<main class="container">
-
-  <section class="section" id="contenidoLibro">
-    <p>Cargando datos...</p>
-  </section>
-
-</main>
-
-<footer class="footer">
-  <div class="container">
-    <p>© 2025 Librarium.es – Todos los derechos reservados</p>
-    <div class="footer-links">
-      <a href="privacidad.html">Política de privacidad</a>
-      <a href="cookies.html">Política de cookies</a>
-      <a href="aviso-legal.html">Aviso legal</a>
-    </div>
-  </div>
-</footer>
-
 <script>
   const AFFILIATE_TAG = "librarium01-21";
-  let asinData = {}; // Objeto global para almacenar los datos de asin.json
+  let asinData = {};
 
-  function generarEstrellas(rating) {
-    const r = Number(rating) || 0;
-    const estrellas = Math.round(r);
-    return "⭐".repeat(Math.max(0, Math.min(5, estrellas))) + ` (${r}/5)`;
+  /* ✅ Cargar asin.json */
+  async function cargarAsinData() {
+    try {
+      const res = await fetch("asin.json");
+      asinData = await res.json();
+    } catch (e) {
+      console.warn("asin.json no disponible", e);
+      asinData = {};
+    }
   }
 
+  /* ✅ Estrellas */
+  function generarEstrellas(rating) {
+    const r = Number(rating) || 0;
+    return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
+  }
+
+  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
-    const random = (seed % 13) / 10;
-    const rating = 3.5 + random;
-    return rating.toFixed(1);
+    return (3.5 + (seed % 13) / 10).toFixed(1);
   }
 
+  /* ✅ ISBN */
   function obtenerISBN(info) {
     if (!info.industryIdentifiers) return null;
     for (const id of info.industryIdentifiers) {
@@ -92,42 +36,120 @@
     return null;
   }
 
-  function portadaLibro(info) {
+  /* ✅ Portada híbrida */
+  function portadaLibro(info, isbnOL = null) {
+    if (isbnOL) return `https://covers.openlibrary.org/b/isbn/${isbnOL}-L.jpg`;
+
     const isbn = obtenerISBN(info);
-    if (isbn) {
-      return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-    }
-    if (info.imageLinks?.thumbnail) {
-      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
-    }
-    return "img/ejemplo.jpg";
+    if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+
+    if (info.imageLinks?.thumbnail)
+      return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
+
+    return "img/portada-default.png";
   }
 
-  /* ✅ CARGA EL ARCHIVO ASIN.JSON BASADO EN TÍTULOS */
-  async function cargarAsinData() {
+  /* ✅ Enlace Amazon */
+  function generarEnlaceAmazon(titulo, autor, isbn) {
+    const limpio = titulo.trim();
+    if (asinData[limpio]) {
+      return `https://www.amazon.es/dp/${asinData[limpio]}?tag=${AFFILIATE_TAG}`;
+    }
+    return `https://www.amazon.es/s?k=${encodeURIComponent(limpio + " " + autor)}&tag=${AFFILIATE_TAG}`;
+  }
+
+  /* ✅ API 1: Google Books */
+  async function buscarGoogleBooksPorID(id) {
     try {
-      const res = await fetch('asin.json');
-      asinData = await res.json();
-    } catch (e) {
-      console.error("No se pudo cargar o parsear asin.json. Usando enlaces de respaldo.", e);
-      asinData = {}; 
+      const url = `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return {
+        id,
+        volumeInfo: data.volumeInfo || {},
+        isbnOL: null
+      };
+    } catch {
+      return null;
     }
   }
 
-  /* ✅ GENERADOR DE ENLACE AMAZON FINAL */
-  function generarEnlaceAmazon(titulo, autor) {
-    const tituloLimpio = titulo.trim();
-    if (asinData[tituloLimpio]) {
-      const asin = asinData[tituloLimpio];
-      return `https://www.amazon.es/dp/${asin}?tag=${AFFILIATE_TAG}`;
+  /* ✅ API 2: Open Library por ID */
+  async function buscarOpenLibraryPorID(id) {
+    try {
+      const url = `https://openlibrary.org/works/${id}.json`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+
+      return {
+        id,
+        volumeInfo: {
+          title: data.title,
+          authors: data.authors ? data.authors.map(a => a.name || "Autor desconocido") : ["Autor desconocido"],
+          description: typeof data.description === "string"
+            ? data.description
+            : data.description?.value || "Sin descripción disponible.",
+          averageRating: null,
+          industryIdentifiers: data.isbn_13
+            ? data.isbn_13.map(i => ({ type: "ISBN_13", identifier: i }))
+            : null
+        },
+        isbnOL: data.isbn_13 ? data.isbn_13[0] : null
+      };
+    } catch {
+      return null;
     }
-    const query = encodeURIComponent(`${tituloLimpio} ${autor}`);
-    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
   }
 
+  /* ✅ API 3: API Española */
+  async function buscarApiEspanolaPorID(id) {
+    try {
+      const url = `https://luisjdev0.github.io/libros-app-api/libro?id=${encodeURIComponent(id)}`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+
+      if (!data || !data.titulo) return null;
+
+      return {
+        id,
+        volumeInfo: {
+          title: data.titulo,
+          authors: data.autor ? [data.autor] : ["Autor desconocido"],
+          description: data.descripcion || "Sin descripción disponible.",
+          averageRating: data.rating || null,
+          industryIdentifiers: data.isbn
+            ? [{ type: "ISBN_13", identifier: data.isbn }]
+            : null,
+          imageLinks: data.portada ? { thumbnail: data.portada } : null
+        },
+        isbnOL: data.isbn || null
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /* ✅ Fallback: buscar por título si el ID no sirve */
+  async function buscarPorTitulo(titulo) {
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(titulo)}&langRestrict=es`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.items || !data.items.length) return null;
+
+    return {
+      id: data.items[0].id,
+      volumeInfo: data.items[0].volumeInfo,
+      isbnOL: null
+    };
+  }
+
+  /* ✅ Cargar libro unificado */
   async function cargarLibro() {
     await cargarAsinData();
-    
+
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
@@ -136,49 +158,50 @@
       return;
     }
 
-    try {
-      const url = `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const info = data.volumeInfo || {};
+    let libro =
+      await buscarGoogleBooksPorID(id) ||
+      await buscarOpenLibraryPorID(id) ||
+      await buscarApiEspanolaPorID(id);
 
-      const titulo = info.title || "Título no disponible";
-      const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
-      const descripcion = info.description || "Sin descripción disponible.";
-      const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+    /* ✅ Si no existe por ID → buscar por título */
+    if (!libro) libro = await buscarPorTitulo(id);
 
-      document.getElementById("tituloHero").textContent = titulo;
-
-      const portada = portadaLibro(info);
-      const enlaceAmazon = generarEnlaceAmazon(titulo, autor);
-
-      document.getElementById("contenidoLibro").innerHTML = `
-        <div class="card" style="max-width: 700px; margin: auto; display:flex; flex-wrap: wrap; gap:20px; align-items:flex-start;">
-          <div style="flex:0 0 200px; width: 100%;">
-            <img src="${portada}" alt="Portada libro" style="width:100%; border-radius:6px;">
-          </div>
-          <div style="flex:1; min-width: 300px;">
-            <h3 style="margin-top:0;">${titulo}</h3>
-            <p><strong>${autor}</strong></p>
-
-            <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer"
-               style="display:inline-block; margin:10px 0; padding:12px 20px; background:#ff9900; color:#111; border-radius:6px; text-decoration:none; font-weight:bold; border: 1px solid #e47911;">
-              🛒 Ver precio en Amazon
-            </a>
-
-            <p>${generarEstrellas(rating)}</p>
-            <p style="margin-top:15px; line-height: 1.6;">${descripcion}</p>
-          </div>
-        </div>
-      `;
-    } catch (e) {
-      console.error("Error cargando libro:", e);
-      document.getElementById("contenidoLibro").innerHTML = "<p>Error al cargar los datos del libro.</p>";
+    if (!libro) {
+      document.getElementById("contenidoLibro").innerHTML = "<p>No se encontraron datos del libro.</p>";
+      return;
     }
+
+    const info = libro.volumeInfo;
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+    const descripcion = info.description || "Sin descripción disponible.";
+    const rating = info.averageRating || ratingAlternativo(titulo);
+    const isbn = obtenerISBN(info);
+    const portada = portadaLibro(info, libro.isbnOL);
+    const enlaceAmazon = generarEnlaceAmazon(titulo, autor, isbn);
+
+    document.getElementById("tituloHero").textContent = titulo;
+
+    document.getElementById("contenidoLibro").innerHTML = `
+      <div class="card" style="max-width: 700px; margin: auto; display:flex; flex-wrap: wrap; gap:20px; align-items:flex-start;">
+        <div style="flex:0 0 200px; width: 100%;">
+          <img src="${portada}" alt="Portada libro" style="width:100%; border-radius:6px;">
+        </div>
+        <div style="flex:1; min-width: 300px;">
+          <h3 style="margin-top:0;">${titulo}</h3>
+          <p><strong>${autor}</strong></p>
+
+          <a class="btn-secondary" href="${enlaceAmazon}" target="_blank" rel="noopener noreferrer"
+             style="display:inline-block; margin:10px 0; padding:12px 20px; background:#ff9900; color:#111; border-radius:6px; text-decoration:none; font-weight:bold; border: 1px solid #e47911;">
+            🛒 Ver precio en Amazon
+          </a>
+
+          <p>${generarEstrellas(rating)}</p>
+          <p style="margin-top:15px; line-height: 1.6;">${descripcion}</p>
+        </div>
+      </div>
+    `;
   }
 
   cargarLibro();
 </script>
-
-</body>
-</html>
