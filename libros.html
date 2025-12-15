@@ -5,11 +5,12 @@
   <title>Libros – Librarium.es</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/estilos.css">
-  <meta name="description" content="Explora libros por categorías, edades, géneros y más. Descubre novedades, infantiles, educativos y los más vendidos.">
+  <meta name="description" content="Explora libros por edades, categorías y tipos. Catálogo completo con paginación y acceso directo a Amazon.">
 </head>
 
 <body>
 
+<!-- ✅ HEADER UNIFICADO -->
 <header class="header">
   <div class="container header-flex">
 
@@ -19,13 +20,13 @@
     </div>
 
     <nav class="menu">
-  <a href="index.html">Inicio</a>
-  <a href="blog.html">Blog</a>
-  <a href="libros.html">Libros</a>
-  <a href="rankings.html">Rankings</a>
-  <a href="resenas.html">Reseñas</a>
-  <a href="contacto.html">Contacto</a>
-</nav>
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="libros.html" class="active">Libros</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
 
     <div class="search-box">
       <form action="buscar.html" method="GET">
@@ -39,46 +40,36 @@
 
 <section class="hero" style="background-image: url('img/hero.png');">
   <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
-    <h2 style="color: #fff; font-size: 2.2rem;">Libros</h2>
-    <p style="color: #ddd; font-size: 1.1rem;">Explora libros y salta directamente a Amazon con un clic.</p>
+    <h2 style="color: #fff; font-size: 2.2rem;">Catálogo de Libros</h2>
+    <p style="color: #ddd; font-size: 1.1rem;">Explora libros por edades, categorías y tipos.</p>
   </div>
 </section>
 
 <main class="container">
 
-  <!-- BUSCADOR CON FILTROS Y PAGINACIÓN -->
+  <!-- ✅ PESTAÑAS -->
   <section class="section">
-    <h2>Buscador avanzado</h2>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-      <input id="busqueda" type="text" placeholder="Buscar por título, autor o ISBN" style="flex:1; padding:10px;">
-      <select id="filtro" style="padding:10px;">
-        <option value="todo">Todos</option>
-        <option value="titulo">Título</option>
-        <option value="autor">Autor</option>
-        <option value="isbn">ISBN</option>
-      </select>
-      <button id="btnBuscar" style="padding:10px 20px;">Buscar</button>
-    </div>
-
-    <div id="resultados" class="grid" style="margin-top:20px;"></div>
-
-    <div id="paginacion" style="display:flex; justify-content:center; gap:10px; margin-top:20px; align-items:center;">
-      <button id="btnAnterior" style="padding:6px 12px;" disabled>Anterior</button>
-      <span id="infoPagina" style="font-size:0.9rem; color:#555;"></span>
-      <button id="btnSiguiente" style="padding:6px 12px;" disabled>Siguiente</button>
+    <div class="tabs">
+      <button class="tab active" data-cat="infantil">Infantil</button>
+      <button class="tab" data-cat="0a3">0–3 años</button>
+      <button class="tab" data-cat="3a5">3–5 años</button>
+      <button class="tab" data-cat="6a8">6–8 años</button>
+      <button class="tab" data-cat="9a12">9–12 años</button>
+      <button class="tab" data-cat="12a16">12–16 años</button>
+      <button class="tab" data-cat="educativos">Educativos</button>
+      <button class="tab" data-cat="actividades">Actividades</button>
+      <button class="tab" data-cat="texto">Libros de texto</button>
     </div>
   </section>
 
-  <!-- CATEGORÍAS PRINCIPALES (ENLACES A OTRAS PÁGINAS) -->
+  <!-- ✅ CONTENEDOR DE RESULTADOS -->
   <section class="section">
-    <h2>Categorías principales</h2>
-    <div class="list">
-      <a class="list-item" href="infantil.html">📘 Libros infantiles</a>
-      <a class="list-item" href="generos.html">📚 Libros por género</a>
-      <a class="list-item" href="edad.html">🎯 Libros por edad</a>
-      <a class="list-item" href="editoriales.html">🏷️ Libros por editorial</a>
-      <a class="list-item" href="textos.html">📖 Libros de texto</a>
+    <div id="resultados" class="grid"></div>
+
+    <div id="paginacion" style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+      <button id="btnAnterior" disabled>Anterior</button>
+      <span id="infoPagina"></span>
+      <button id="btnSiguiente" disabled>Siguiente</button>
     </div>
   </section>
 
@@ -96,113 +87,117 @@
 </footer>
 
 <script>
-  const AFFILIATE_TAG = "librarium01-21";
-  const MAX_RESULTS = 12;      // libros por página
-  let paginaActual = 0;        // empieza en 0
-  let ultimaConsulta = "";     // query base (sin startIndex)
-  let ultimoFiltro = "todo";   // filtro usado
+/* ✅ CONFIGURACIÓN */
+const AFFILIATE_TAG = "librarium01-21";
+const MAX_RESULTS = 12;
+let paginaActual = 0;
+let categoriaActual = "infantil";
 
-  function generarEstrellas(rating) {
-    const r = Number(rating) || 0;
-    const estrellas = Math.round(r);
-    return "⭐".repeat(estrellas) + ` (${r}/5)`;
-  }
+/* ✅ CONSULTAS POR CATEGORÍA */
+const QUERIES = {
+  infantil: "libros infantiles cuentos",
+  "0a3": "libros bebes 0 3 años cuentos",
+  "3a5": "cuentos ilustrados 3 5 años",
+  "6a8": "primeros lectores 6 8 años",
+  "9a12": "libros infantiles 9 12 años aventuras",
+  "12a16": "libros juvenil 12 16 años",
+  educativos: "libros educativos primaria",
+  actividades: "cuadernos actividades niños",
+  texto: "libros texto primaria santillana sm anaya"
+};
 
-  function ratingAlternativo(titulo) {
-    let seed = 0;
-    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
-    const random = (seed % 13) / 10;
-    return (3.5 + random).toFixed(1);
-  }
+/* ✅ FUNCIONES BASE */
+function generarEstrellas(rating) {
+  const r = Number(rating) || 0;
+  return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
+}
 
-  async function buscarLibros(query, page = 0) {
-    const startIndex = page * MAX_RESULTS;
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${MAX_RESULTS}&startIndex=${startIndex}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return {
-      items: data.items || [],
-      total: data.totalItems || 0
-    };
-  }
+function ratingAlternativo(titulo) {
+  let seed = 0;
+  for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+  return (3.5 + (seed % 13) / 10).toFixed(1);
+}
 
-  function portada(info) {
-    const isbn = info.industryIdentifiers?.[0]?.identifier;
-    return isbn
-      ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
-      : "img/ejemplo.jpg";
-  }
+async function buscarLibros(query, page = 0) {
+  const startIndex = page * MAX_RESULTS;
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${MAX_RESULTS}&startIndex=${startIndex}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return {
+    items: data.items || [],
+    total: data.totalItems || 0
+  };
+}
 
-  function enlaceAmazon(titulo, autor) {
-    const query = encodeURIComponent(`${titulo} ${autor}`);
-    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
-  }
+function portada(info) {
+  const isbn = info.industryIdentifiers?.[0]?.identifier;
+  if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+  if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
+  return "img/ejemplo.jpg";
+}
 
-  function card(item) {
-    const info = item.volumeInfo || {};
-    const titulo = info.title || "Título no disponible";
-    const autor = info.authors?.join(", ") || "Autor desconocido";
-    const rating = info.averageRating || ratingAlternativo(titulo);
+function enlaceAmazon(titulo, autor) {
+  const query = encodeURIComponent(`${titulo} ${autor}`);
+  return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
+}
 
-    return `
-      <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit;">
-        <img src="${portada(info)}" alt="Portada libro">
-        <h3>${titulo}</h3>
-        <p><strong>${autor}</strong></p>
-        <p>${generarEstrellas(rating)}</p>
-      </a>
-    `;
-  }
+function card(item) {
+  const info = item.volumeInfo || {};
+  const titulo = info.title || "Título no disponible";
+  const autor = info.authors?.join(", ") || "Autor desconocido";
+  const rating = info.averageRating || ratingAlternativo(titulo);
 
-  async function ejecutarBusqueda() {
-    const texto = document.getElementById("busqueda").value.trim();
-    const filtro = document.getElementById("filtro").value;
+  return `
+    <a href="${enlaceAmazon(titulo, autor)}" class="card" target="_blank">
+      <img src="${portada(info)}">
+      <h3>${titulo}</h3>
+      <p><strong>${autor}</strong></p>
+      <p>${generarEstrellas(rating)}</p>
+    </a>
+  `;
+}
 
-    if (!texto && !ultimaConsulta) return;
+/* ✅ CARGAR CATEGORÍA */
+async function cargarCategoria() {
+  const query = QUERIES[categoriaActual];
+  const { items, total } = await buscarLibros(query, paginaActual);
 
-    // Si hay texto nuevo, reseteamos a página 0
-    if (texto) {
-      paginaActual = 0;
-      ultimoFiltro = filtro;
-      if (filtro === "titulo") ultimaConsulta = `intitle:${texto}`;
-      else if (filtro === "autor") ultimaConsulta = `inauthor:${texto}`;
-      else if (filtro === "isbn") ultimaConsulta = `isbn:${texto}`;
-      else ultimaConsulta = texto;
-    }
+  document.getElementById("resultados").innerHTML = items.map(card).join("");
 
-    const { items, total } = await buscarLibros(ultimaConsulta, paginaActual);
-    const cont = document.getElementById("resultados");
-    cont.innerHTML = items.map(card).join("");
+  const totalPaginas = Math.ceil(total / MAX_RESULTS);
+  document.getElementById("infoPagina").textContent = `Página ${paginaActual + 1} de ${totalPaginas}`;
 
-    // paginación
-    const totalPaginas = Math.ceil(total / MAX_RESULTS);
-    const info = document.getElementById("infoPagina");
-    const btnAnt = document.getElementById("btnAnterior");
-    const btnSig = document.getElementById("btnSiguiente");
+  document.getElementById("btnAnterior").disabled = paginaActual === 0;
+  document.getElementById("btnSiguiente").disabled = paginaActual >= totalPaginas - 1;
+}
 
-    if (totalPaginas === 0) {
-      info.textContent = "Sin resultados.";
-      btnAnt.disabled = true;
-      btnSig.disabled = true;
-    } else {
-      info.textContent = `Página ${paginaActual + 1} de ${totalPaginas}`;
-      btnAnt.disabled = paginaActual === 0;
-      btnSig.disabled = paginaActual >= totalPaginas - 1;
-    }
-  }
+/* ✅ EVENTOS DE PESTAÑAS */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
 
-  document.getElementById("btnBuscar").addEventListener("click", ejecutarBusqueda);
-  document.getElementById("btnAnterior").addEventListener("click", () => {
-    if (paginaActual > 0) {
-      paginaActual--;
-      ejecutarBusqueda();
-    }
+    categoriaActual = tab.dataset.cat;
+    paginaActual = 0;
+    cargarCategoria();
   });
-  document.getElementById("btnSiguiente").addEventListener("click", () => {
-    paginaActual++;
-    ejecutarBusqueda();
-  });
+});
+
+/* ✅ PAGINACIÓN */
+document.getElementById("btnAnterior").addEventListener("click", () => {
+  if (paginaActual > 0) {
+    paginaActual--;
+    cargarCategoria();
+  }
+});
+
+document.getElementById("btnSiguiente").addEventListener("click", () => {
+  paginaActual++;
+  cargarCategoria();
+});
+
+/* ✅ CARGA INICIAL */
+cargarCategoria();
 </script>
-
 </body>
 </html>
