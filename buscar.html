@@ -24,7 +24,6 @@
       <a href="contacto.html">Contacto</a>
     </nav>
 
-    <!-- ✅ Buscador integrado -->
     <div class="search-box">
       <form action="buscar.html" method="GET">
         <input type="text" name="q" placeholder="Buscar libros..." required>
@@ -56,20 +55,17 @@
 <script>
   const AFFILIATE_TAG = "librarium01-21";
 
-  /* ✅ Estrellas */
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
     return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
   }
 
-  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
     return (3.5 + (seed % 13) / 10).toFixed(1);
   }
 
-  /* ✅ ISBN */
   function obtenerISBN(info) {
     if (!info.industryIdentifiers) return null;
     for (const id of info.industryIdentifiers) {
@@ -97,7 +93,6 @@
     return "img/portada-default.png";
   }
 
-  /* ✅ Enlace Amazon */
   function generarEnlaceAmazon(titulo, autor, isbn) {
     if (isbn) {
       return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
@@ -105,7 +100,6 @@
     return `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
   }
 
-  /* ✅ Tarjeta */
   function crearCard(item) {
     const info = item.volumeInfo;
     const titulo = info.title || "Título no disponible";
@@ -113,7 +107,6 @@
     const rating = info.averageRating || ratingAlternativo(titulo);
     const isbn = obtenerISBN(info);
     const portada = portadaLibro(info, item.isbnOL);
-    const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
 
     return `
       <a href="libro.html?id=${item.id}" class="card" style="text-decoration:none;color:inherit;">
@@ -149,7 +142,7 @@
       volumeInfo: {
         title: doc.title,
         authors: doc.author_name || ["Autor desconocido"],
-        description: doc.first_sentence || "Sin descripción disponible.",
+        description: doc.first_sentence?.value || "Sin descripción disponible.",
         averageRating: null,
         industryIdentifiers: doc.isbn
           ? doc.isbn.map(i => ({ type: "ISBN_13", identifier: i }))
@@ -205,10 +198,10 @@
 
     let resultados = [...google, ...openlib, ...apiEs];
 
-    // ✅ Eliminar duplicados por título
+    // ✅ Eliminar duplicados por título normalizado
     const titulos = new Set();
     resultados = resultados.filter(item => {
-      const t = item.volumeInfo.title;
+      const t = item.volumeInfo.title.trim().toLowerCase();
       if (titulos.has(t)) return false;
       titulos.add(t);
       return true;
