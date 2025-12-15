@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reseñas de Fantasía – Librarium.es</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/estilos.css">
+  <meta name="description" content="Reseñas automáticas de libros de fantasía con valoraciones y fichas detalladas.">
+</head>
+
+<body>
+
+<header class="header">
+  <div class="container header-flex">
+
+    <div class="logo-box">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text">Librarium.es</span>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html" class="active">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <div class="search-box">
+      <form action="buscar.html" method="GET">
+        <input type="text" name="q" placeholder="Buscar libros..." required>
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+
+  </div>
+</header>
+
+<section class="hero" style="background-image: url('img/hero.png');">
+  <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
+    <h2 style="color: #fff; font-size: 2.2rem;">Reseñas de Fantasía</h2>
+    <p style="color: #ddd; font-size: 1.1rem;">Los mejores libros de fantasía ordenados por valoración.</p>
+  </div>
+</section>
+
+<main class="container">
+
+  <section class="section">
+    <h2>Libros destacados de Fantasía</h2>
+    <div id="resenas" class="grid"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Librarium.es – Todos los derechos reservados</p>
+    <div class="footer-links">
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="cookies.html">Política de cookies</a>
+      <a href="aviso-legal.html">Aviso legal</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function generarEstrellas(rating) {
+    const estrellas = Math.round(rating);
+    return "⭐".repeat(estrellas) + ` (${rating}/5)`;
+  }
+
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    const random = (seed % 13) / 10;
+    return (3.5 + random).toFixed(1);
+  }
+
+  function obtenerISBN(info) {
+    if (!info.industryIdentifiers) return null;
+    for (const id of info.industryIdentifiers) {
+      if (id.type === "ISBN_13") return id.identifier;
+      if (id.type === "ISBN_10") return id.identifier;
+    }
+    return null;
+  }
+
+  function portadaLibro(info) {
+    const isbn = obtenerISBN(info);
+    if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
+    return "img/ejemplo.jpg";
+  }
+
+  async function buscarLibros(query, max = 20) {
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${max}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.items || [];
+  }
+
+  function crearCard(item) {
+    const info = item.volumeInfo;
+    const id = item.id;
+    const portada = portadaLibro(info);
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+    const rating = info.averageRating || ratingAlternativo(titulo);
+
+    return `
+      <a href="libro.html?id=${encodeURIComponent(id)}" class="card">
+        <img src="${portada}" alt="Portada libro">
+        <h3>${titulo}</h3>
+        <p><strong>${autor}</strong></p>
+        <p>${generarEstrellas(rating)}</p>
+      </a>
+    `;
+  }
+
+  async function cargarLista() {
+    const libros = await buscarLibros("best fantasy books", 20);
+
+    libros.sort((a, b) => {
+      const rA = a.volumeInfo.averageRating || ratingAlternativo(a.volumeInfo.title);
+      const rB = b.volumeInfo.averageRating || ratingAlternativo(b.volumeInfo.title);
+      return rB - rA;
+    });
+
+    const cont = document.getElementById("resenas");
+    cont.innerHTML = "";
+
+    libros.forEach(item => cont.innerHTML += crearCard(item));
+  }
+
+  cargarLista();
+</script>
+
+</body>
+</html>
