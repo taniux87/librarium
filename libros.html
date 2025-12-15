@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Libros – Librarium.es</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/estilos.css">
+  <meta name="description" content="Explora libros por categorías, edades, géneros y más. Descubre novedades, infantiles, educativos y los más vendidos.">
+</head>
+
+<body>
+
+<header class="header">
+  <div class="container header-flex">
+    <div class="logo-box">
+      <span class="logo-icon">📚</span>
+      <span class="logo-text">Librarium.es</span>
+    </div>
+
+    <nav class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="libros.html" class="active">Libros</a>
+      <a href="resenas.html">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="background-image: url('img/hero.png');">
+  <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
+    <h2 style="color: #fff; font-size: 2.2rem;">Libros</h2>
+    <p style="color: #ddd; font-size: 1.1rem;">Explora libros por categorías, edades, géneros y más.</p>
+  </div>
+</section>
+
+<main class="container">
+
+  <!-- BUSCADOR AVANZADO -->
+  <section class="section">
+    <h2>Buscador avanzado</h2>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input id="busqueda" type="text" placeholder="Buscar por título, autor o ISBN" style="flex:1; padding:10px;">
+      <select id="filtro" style="padding:10px;">
+        <option value="todo">Todos</option>
+        <option value="titulo">Título</option>
+        <option value="autor">Autor</option>
+        <option value="isbn">ISBN</option>
+      </select>
+      <button onclick="buscar()" style="padding:10px 20px;">Buscar</button>
+    </div>
+
+    <div id="resultados" class="grid" style="margin-top:20px;"></div>
+  </section>
+
+  <!-- CATEGORÍAS -->
+  <section class="section">
+    <h2>Categorías principales</h2>
+    <div class="list">
+      <a class="list-item" href="infantil.html">📘 Libros infantiles</a>
+      <a class="list-item" href="generos.html">📚 Libros por género</a>
+      <a class="list-item" href="edad.html">🎯 Libros por edad</a>
+      <a class="list-item" href="editoriales.html">🏷️ Libros por editorial</a>
+      <a class="list-item" href="textos.html">📖 Libros de texto</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Librarium.es – Todos los derechos reservados</p>
+    <div class="footer-links">
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="cookies.html">Política de cookies</a>
+      <a href="aviso-legal.html">Aviso legal</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const AFFILIATE_TAG = "librarium01-21";
+
+  function generarEstrellas(rating) {
+    const r = Number(rating) || 0;
+    const estrellas = Math.round(r);
+    return "⭐".repeat(estrellas) + ` (${r}/5)`;
+  }
+
+  function ratingAlternativo(titulo) {
+    let seed = 0;
+    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
+    const random = (seed % 13) / 10;
+    const rating = 3.5 + random;
+    return rating.toFixed(1);
+  }
+
+  async function buscarLibros(query, max = 12) {
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${max}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.items || [];
+  }
+
+  function obtenerISBN(info) {
+    if (!info.industryIdentifiers) return null;
+    for (const id of info.industryIdentifiers) {
+      if (id.type === "ISBN_13") return id.identifier;
+      if (id.type === "ISBN_10") return id.identifier;
+    }
+    return null;
+  }
+
+  function portadaOpenLibrary(isbn) {
+    return isbn
+      ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
+      : "img/ejemplo.jpg";
+  }
+
+  function generarEnlaceAmazon(titulo, autor, isbn) {
+    if (isbn) {
+      return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
+    }
+    const query = encodeURIComponent(`${titulo} ${autor}`);
+    return `https://www.amazon.es/s?k=${query}&tag=${AFFILIATE_TAG}`;
+  }
+
+  function crearCard(item) {
+    const info = item.volumeInfo || {};
+    const titulo = info.title || "Título no disponible";
+    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
+    const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+
+    const isbn = obtenerISBN(info);
+    const portada = portadaOpenLibrary(isbn);
+    const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
+
+    return `
+      <a href="${amazonUrl}" class="card" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+        <img src="${portada}" alt="Portada libro">
+        <h3>${titulo}</h3>
+        <p><strong>${autor}</strong></p>
+        <p>${generarEstrellas(rating)}</p>
+      </a>
+    `;
+  }
+
+  async function buscar() {
+    const texto = document.getElementById("busqueda").value.trim();
+    const filtro = document.getElementById("filtro").value;
+
+    if (!texto) return;
+
+    let query = texto;
+
+    if (filtro === "titulo") query = `intitle:${texto}`;
+    if (filtro === "autor") query = `inauthor:${texto}`;
+    if (filtro === "isbn") query = `isbn:${texto}`;
+
+    const libros = await buscarLibros(query);
+    const cont = document.getElementById("resultados");
+    cont.innerHTML = "";
+
+    libros.forEach(item => cont.innerHTML += crearCard(item));
+  }
+</script>
+
+</body>
+</html>
