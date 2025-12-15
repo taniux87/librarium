@@ -56,17 +56,20 @@
 <script>
   const AFFILIATE_TAG = "librarium01-21";
 
+  /* ✅ Estrellas */
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
     return "⭐".repeat(Math.round(r)) + ` (${r}/5)`;
   }
 
+  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
     return (3.5 + (seed % 13) / 10).toFixed(1);
   }
 
+  /* ✅ ISBN */
   function obtenerISBN(info) {
     if (!info.industryIdentifiers) return null;
     for (const id of info.industryIdentifiers) {
@@ -76,10 +79,13 @@
     return null;
   }
 
-  /* ✅ Portada híbrida */
-  function portadaLibro(info) {
-    const isbn = obtenerISBN(info);
+  /* ✅ Portada híbrida + portada por defecto */
+  function portadaLibro(info, isbnOL = null) {
+    if (isbnOL) {
+      return `https://covers.openlibrary.org/b/isbn/${isbnOL}-L.jpg`;
+    }
 
+    const isbn = obtenerISBN(info);
     if (isbn) {
       return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
     }
@@ -88,9 +94,10 @@
       return info.imageLinks.thumbnail.replace(/^http:\/\//, "https://");
     }
 
-    return null; // ✅ Para poder filtrar
+    return "img/portada-default.jpg";
   }
 
+  /* ✅ Enlace Amazon */
   function generarEnlaceAmazon(titulo, autor, isbn) {
     if (isbn) {
       return `https://www.amazon.es/dp/${isbn}?tag=${AFFILIATE_TAG}`;
@@ -98,13 +105,14 @@
     return `https://www.amazon.es/s?k=${encodeURIComponent(titulo + " " + autor)}&tag=${AFFILIATE_TAG}`;
   }
 
+  /* ✅ Tarjeta */
   function crearCard(item) {
     const info = item.volumeInfo;
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
     const rating = info.averageRating || ratingAlternativo(titulo);
     const isbn = obtenerISBN(info);
-    const portada = portadaLibro(info);
+    const portada = portadaLibro(info, item.isbnOL);
     const amazonUrl = generarEnlaceAmazon(titulo, autor, isbn);
 
     return `
@@ -117,26 +125,98 @@
     `;
   }
 
-  async function cargarBusqueda() {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get("q");
-
-    if (!q) return;
-
+  /* ✅ API 1: Google Books */
+  async function buscarGoogleBooks(q) {
     const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&langRestrict=es&maxResults=20`;
     const res = await fetch(url);
     const data = await res.json();
+    return (data.items || []).map(item => ({
+      ...item,
+      isbnOL: null
+    }));
+  }
+
+  /* ✅ API 2: Open Library */
+  async function buscarOpenLibrary(q) {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&language=spa&limit=20`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.docs) return [];
+
+    return data.docs.map(doc => ({
+      id: doc.key.replace("/works/", ""),
+      volumeInfo: {
+        title: doc.title,
+        authors: doc.author_name || ["Autor desconocido"],
+        description: doc.first_sentence || "Sin descripción disponible.",
+        averageRating: null,
+        industryIdentifiers: doc.isbn
+          ? doc.isbn.map(i => ({ type: "ISBN_13", identifier: i }))
+          : null
+      },
+      isbnOL: doc.isbn ? doc.isbn[0] : null
+    }));
+  }
+
+  /* ✅ API 3: Libros en Español (GitHub) */
+  async function buscarApiEspanola(q) {
+    const url = `https://luisjdev0.github.io/libros-app-api/buscar?titulo=${encodeURIComponent(q)}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data || !data.libros) return [];
+
+      return data.libros.map(libro => ({
+        id: libro.id || libro.titulo.replace(/\s+/g, "-"),
+        volumeInfo: {
+          title: libro.titulo,
+          authors: libro.autor ? [libro.autor] : ["Autor desconocido"],
+          description: libro.descripcion || "Sin descripción disponible.",
+          averageRating: libro.rating || null,
+          industryIdentifiers: libro.isbn
+            ? [{ type: "ISBN_13", identifier: libro.isbn }]
+            : null,
+          imageLinks: libro.portada ? { thumbnail: libro.portada } : null
+        },
+        isbnOL: libro.isbn || null
+      }));
+    } catch (e) {
+      console.warn("API española falló:", e);
+      return [];
+    }
+  }
+
+  /* ✅ Cargar búsqueda con TODAS las APIs */
+  async function cargarBusqueda() {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (!q) return;
 
     const cont = document.getElementById("resultados");
+    cont.innerHTML = "<p>Cargando resultados...</p>";
+
+    const [google, openlib, apiEs] = await Promise.all([
+      buscarGoogleBooks(q),
+      buscarOpenLibrary(q),
+      buscarApiEspanola(q)
+    ]);
+
+    let resultados = [...google, ...openlib, ...apiEs];
+
+    // ✅ Eliminar duplicados por título
+    const titulos = new Set();
+    resultados = resultados.filter(item => {
+      const t = item.volumeInfo.title;
+      if (titulos.has(t)) return false;
+      titulos.add(t);
+      return true;
+    });
+
     cont.innerHTML = "";
 
-    (data.items || []).forEach(item => {
-      const info = item.volumeInfo || {};
-
-      // ✅ FILTRO: solo mostrar si tiene portada real
-      const portada = portadaLibro(info);
-      if (!portada) return;
-
+    resultados.forEach(item => {
       cont.innerHTML += crearCard(item);
     });
   }
