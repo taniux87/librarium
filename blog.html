@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/estilos.css">
   <meta name="description" content="Artículos, curiosidades, análisis y contenido literario en Librarium.es.">
+
   <style>
     /* ✅ Cards del blog */
     .blog-grid {
@@ -24,6 +25,7 @@
       transition: 0.2s ease;
       text-decoration: none;
       color: inherit;
+      display: block;
     }
 
     .blog-card:hover {
@@ -59,9 +61,10 @@
     }
   </style>
 </head>
+
 <body>
 
- <!-- ✅ HEADER UNIFICADO -->
+  <!-- ✅ HEADER UNIFICADO -->
   <header class="header">
     <div class="container header-flex">
 
@@ -91,16 +94,22 @@
 
   <!-- ✅ HERO DEL BLOG -->
   <section class="hero" style="background-image: url('img/hero.png');">
-    <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
-      <h2 style="color: #fff; font-size: 2.2rem;">Artículos y guías literarias</h2>
-      <p style="color: #ddd; font-size: 1.1rem;">Descubre análisis, recomendaciones y contenido exclusivo para lectores apasionados.</p>
+    <div class="container hero-overlay">
+      <h2>Artículos y guías literarias</h2>
+      <p>Descubre análisis, recomendaciones y contenido exclusivo para lectores apasionados.</p>
     </div>
   </section>
 
   <!-- ✅ CONTENIDO PRINCIPAL -->
   <main class="container">
 
-   <!-- ✅ ARTÍCULO 1 -->
+    <!-- ✅ LISTADO PRINCIPAL DE ARTÍCULOS -->
+    <section class="section">
+      <h2>Últimos artículos</h2>
+
+      <div class="blog-grid">
+
+        <!-- ✅ ARTÍCULO 1 -->
         <a href="articulo1.html" class="blog-card">
           <img src="img/blog1.jpg" alt="Artículo 1">
           <div class="blog-card-content">
@@ -131,7 +140,6 @@
         </a>
 
       </div>
-
     </section>
 
     <!-- ✅ MICRO‑ARTÍCULOS DINÁMICOS -->
