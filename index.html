@@ -94,28 +94,22 @@
   </footer>
 
 <script>
+  /* ✅ Estrellas */
   function generarEstrellas(rating) {
     const r = Number(rating) || 0;
     const estrellas = Math.round(r);
     return "⭐".repeat(estrellas) + ` (${r}/5)`;
   }
 
+  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
     const random = (seed % 13) / 10;
-    const rating = 3.5 + random;
-    return rating.toFixed(1);
+    return (3.5 + random).toFixed(1);
   }
 
-  async function buscarLibros(query, max = 4) {
-    const q = encodeURIComponent(query);
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=es&maxResults=${max}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.items || [];
-  }
-
+  /* ✅ Obtener ISBN */
   function obtenerISBN(info) {
     if (!info.industryIdentifiers) return null;
     for (const id of info.industryIdentifiers) {
@@ -125,29 +119,69 @@
     return null;
   }
 
-  function portadaLibro(info) {
+  /* ✅ Portada híbrida + portada por defecto */
+  function portadaLibro(info, isbnOL = null) {
+    if (isbnOL) {
+      return `https://covers.openlibrary.org/b/isbn/${isbnOL}-L.jpg`;
+    }
+
+    if (info.imageLinks?.thumbnail) {
+      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
+    }
+
     const isbn = obtenerISBN(info);
     if (isbn) {
       return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
     }
-    if (info.imageLinks?.thumbnail) {
-      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
-    }
-    return "img/ejemplo.jpg";
+
+    return "img/portada-default.jpg";
   }
 
+  /* ✅ Búsqueda híbrida: Open Library (ES) + Google Books */
+  async function buscarLibros(query, max = 4) {
+    // ✅ 1. Buscar en Open Library
+    const urlOL = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&language=spa&limit=${max}`;
+    const resOL = await fetch(urlOL);
+    const dataOL = await resOL.json();
+
+    if (dataOL.docs && dataOL.docs.length > 0) {
+      return dataOL.docs.map(doc => ({
+        id: doc.key.replace("/works/", ""),
+        volumeInfo: {
+          title: doc.title,
+          authors: doc.author_name || ["Autor desconocido"],
+          description: doc.first_sentence ? doc.first_sentence[0] : "Sin descripción disponible.",
+          averageRating: null,
+          industryIdentifiers: doc.isbn ? doc.isbn.map(i => ({ type: "ISBN_13", identifier: i })) : null
+        },
+        isbnOL: doc.isbn ? doc.isbn[0] : null
+      }));
+    }
+
+    // ✅ 2. Si no encuentra → Google Books en español
+    const urlGB = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=${max}`;
+    const resGB = await fetch(urlGB);
+    const dataGB = await resGB.json();
+
+    return (dataGB.items || []).map(item => ({
+      ...item,
+      isbnOL: null
+    }));
+  }
+
+  /* ✅ Crear tarjeta */
   function crearCard(item) {
-    const id = item.id;
     const info = item.volumeInfo || {};
+    const id = item.id;
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
     const descripcion = info.description ? info.description.substring(0, 120) + "..." : "Sin resumen disponible.";
-    const rating = info.averageRating ? info.averageRating : ratingAlternativo(titulo);
+    const rating = info.averageRating || ratingAlternativo(titulo);
 
-    const portada = portadaLibro(info);
+    const portada = portadaLibro(info, item.isbnOL);
 
     return `
-      <a href="libro.html?id=${id}" class="card" style="text-decoration: none; color: inherit;">
+      <a href="libro.html?id=${id}" class="card">
         <img src="${portada}" alt="Portada libro">
         <h3>${titulo}</h3>
         <p><strong>${autor}</strong></p>
@@ -157,17 +191,12 @@
     `;
   }
 
+  /* ✅ Cargar novedades */
   async function cargarNovedades() {
-    try {
-      const libros = await buscarLibros("novedades editoriales libros 2025");
-      const cont = document.getElementById("novedades");
-      cont.innerHTML = "";
-      libros.forEach(item => cont.innerHTML += crearCard(item));
-    } catch (e) {
-      console.error("Error cargando novedades:", e);
-      const cont = document.getElementById("novedades");
-      if (cont) cont.innerHTML = "<p>No se pudieron cargar las novedades.</p>";
-    }
+    const libros = await buscarLibros("novedades libros españa 2025", 4);
+    const cont = document.getElementById("novedades");
+    cont.innerHTML = "";
+    libros.forEach(item => cont.innerHTML += crearCard(item));
   }
 
   cargarNovedades();

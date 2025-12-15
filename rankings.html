@@ -202,11 +202,13 @@
 </footer>
 
 <script>
+  /* ✅ Estrellas */
   function generarEstrellas(rating) {
     const estrellas = Math.round(rating);
     return "⭐".repeat(estrellas) + ` (${rating}/5)`;
   }
 
+  /* ✅ Rating alternativo */
   function ratingAlternativo(titulo) {
     let seed = 0;
     for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
@@ -214,13 +216,7 @@
     return (3.5 + random).toFixed(1);
   }
 
-  async function buscarLibros(query, startIndex = 0, max = 12) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&startIndex=${startIndex}&maxResults=${max}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.items || [];
-  }
-
+  /* ✅ Obtener ISBN */
   function obtenerISBN(info) {
     if (!info.industryIdentifiers) return null;
     for (const id of info.industryIdentifiers) {
@@ -230,20 +226,63 @@
     return null;
   }
 
-  function portadaLibro(info) {
+  /* ✅ Portada híbrida + portada por defecto */
+  function portadaLibro(info, isbnOL = null) {
+    if (isbnOL) {
+      return `https://covers.openlibrary.org/b/isbn/${isbnOL}-L.jpg`;
+    }
+
+    if (info.imageLinks?.thumbnail) {
+      return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
+    }
+
     const isbn = obtenerISBN(info);
-    if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-    if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
-    return "img/ejemplo.jpg";
+    if (isbn) {
+      return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    }
+
+    return "img/portada-default.jpg";
   }
 
+  /* ✅ Búsqueda híbrida: Open Library (ES) + Google Books */
+  async function buscarLibros(query, startIndex = 0, max = 12) {
+    const urlOL = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&language=spa&limit=${max}`;
+    const resOL = await fetch(urlOL);
+    const dataOL = await resOL.json();
+
+    if (dataOL.docs && dataOL.docs.length > 0) {
+      return dataOL.docs.map(doc => ({
+        id: doc.key.replace("/works/", ""),
+        volumeInfo: {
+          title: doc.title,
+          authors: doc.author_name || ["Autor desconocido"],
+          description: doc.first_sentence ? doc.first_sentence[0] : "Sin descripción disponible.",
+          averageRating: null,
+          industryIdentifiers: doc.isbn ? doc.isbn.map(i => ({ type: "ISBN_13", identifier: i })) : null
+        },
+        isbnOL: doc.isbn ? doc.isbn[0] : null
+      }));
+    }
+
+    const urlGB = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&startIndex=${startIndex}&maxResults=${max}`;
+    const resGB = await fetch(urlGB);
+    const dataGB = await resGB.json();
+
+    return (dataGB.items || []).map(item => ({
+      ...item,
+      isbnOL: null
+    }));
+  }
+
+  /* ✅ Tarjeta */
   function crearCard(item) {
-    const id = item.id;
     const info = item.volumeInfo;
+    const id = item.id;
     const titulo = info.title || "Título no disponible";
     const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
     const rating = info.averageRating || ratingAlternativo(titulo);
-    const portada = portadaLibro(info);
+
+    const portada = portadaLibro(info, item.isbnOL);
 
     return `
       <a href="libro.html?id=${id}" class="card">
@@ -261,7 +300,14 @@
     const paginacion = document.getElementById(id + "-paginacion");
 
     const startIndex = (pagina - 1) * 12;
-    const libros = await buscarLibros(query, startIndex, 12);
+    let libros = await buscarLibros(query, startIndex, 12);
+
+    /* ✅ Ordenar por estrellas */
+    libros.sort((a, b) => {
+      const rA = a.volumeInfo.averageRating || ratingAlternativo(a.volumeInfo.title);
+      const rB = b.volumeInfo.averageRating || ratingAlternativo(b.volumeInfo.title);
+      return rB - rA;
+    });
 
     cont.innerHTML = "";
     libros.forEach(item => cont.innerHTML += crearCard(item));
@@ -274,17 +320,17 @@
   }
 
   /* ✅ CARGAR TODAS LAS CATEGORÍAS */
-  cargarPagina("fantasia", "best fantasy books");
-  cargarPagina("terror", "best horror books");
-  cargarPagina("romance", "best romance novels");
-  cargarPagina("thriller", "best thriller books");
+  cargarPagina("fantasia", "fantasía libros españa");
+  cargarPagina("terror", "terror libros españa");
+  cargarPagina("romance", "romance libros españa");
+  cargarPagina("thriller", "thriller libros españa");
 
-  cargarPagina("scifi", "best science fiction books");
-  cargarPagina("misterio", "best mystery books");
-  cargarPagina("noficcion", "best nonfiction books");
-  cargarPagina("juvenil", "best young adult books");
-  cargarPagina("historia", "best history books");
-  cargarPagina("autoayuda", "best self help books");
+  cargarPagina("scifi", "ciencia ficción libros españa");
+  cargarPagina("misterio", "misterio libros españa");
+  cargarPagina("noficcion", "no ficción libros españa");
+  cargarPagina("juvenil", "literatura juvenil españa");
+  cargarPagina("historia", "libros de historia españa");
+  cargarPagina("autoayuda", "libros de autoayuda españa");
 
   /* ✅ Lógica de pestañas */
   const tabs = document.querySelectorAll(".tab-btn");
