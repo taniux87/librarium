@@ -394,29 +394,3 @@ body {
   font-weight: 600;
   color: #C9A86A;
 }
-/* --------------------------------------------------
-   CORRECCIONES ESPECÍFICAS DE DISEÑO (AÑADIR AL FINAL)
--------------------------------------------------- */
-
-/* 1. Ocultar el texto de SEO (H1 y P con clase "seo-hide") */
-.seo-hide {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  z-index: -1;
-}
-
-/* 2. Arreglar el apilamiento de la lista de artículos (si se llega a usar en el index o blog) */
-.list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Añade separación vertical entre los enlaces */
-}
-
-/* 3. Asegurar que los items de la lista ocupen todo el ancho, si se usan */
-.list-item {
-    display: block; 
-}
-
