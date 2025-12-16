@@ -810,3 +810,207 @@ a:hover {
 .footer a:hover {
   color: #f5dca0;
 }
+/* --------------------------------------------------
+   TEMA OSCURO PREMIUM UNIFICADO
+-------------------------------------------------- */
+
+/* Fondo general */
+body {
+  background: #0b0b0b !important;
+  color: #e8e0c8 !important;
+  font-family: "Merriweather", serif;
+}
+
+/* Títulos */
+h1, h2, h3, h4 {
+  color: #d4b46a !important;
+  font-family: "Merriweather", serif;
+}
+
+/* Párrafos y texto general */
+p, li, span, strong {
+  color: #e8e0c8 !important;
+}
+
+/* Enlaces */
+a {
+  color: #d4b46a !important;
+  text-decoration: none;
+}
+a:hover {
+  color: #f5dca0 !important;
+}
+
+/* Header */
+.header {
+  background: #111 !important;
+  border-bottom: 1px solid #333;
+}
+.menu a {
+  color: #e8e0c8 !important;
+}
+.menu a.active {
+  border-bottom: 2px solid #d4b46a !important;
+  color: #d4b46a !important;
+}
+.menu a:hover {
+  color: #f5dca0 !important;
+}
+
+/* Buscador */
+.search-box input {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  color: #e8e0c8 !important;
+}
+.search-box button {
+  background: #d4b46a !important;
+  color: #000 !important;
+}
+
+/* Hero */
+.hero {
+  background-size: cover;
+  background-position: center;
+}
+.hero-overlay,
+.hero .container {
+  background: rgba(0,0,0,0.6) !important;
+  border-radius: 12px;
+}
+
+/* Secciones */
+.section {
+  background: #111 !important;
+  padding: 40px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  border: 1px solid #222;
+}
+
+/* Cards */
+.card {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  color: #e8e0c8 !important;
+}
+.card h3 {
+  color: #d4b46a !important;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(212,180,106,0.2);
+}
+
+/* Grid */
+.grid {
+  gap: 25px;
+}
+
+/* Listas de artículos */
+.list-item {
+  color: #d4b46a !important;
+  border-bottom: 1px solid #333 !important;
+}
+.list-item:hover {
+  color: #f5dca0 !important;
+}
+
+/* Bloques SEO */
+.bloque-seo {
+  background: #111 !important;
+  padding: 40px;
+  border-radius: 12px;
+  margin: 40px auto;
+  border: 1px solid #222;
+}
+.bloque-seo ul li a {
+  color: #d4b46a !important;
+}
+
+/* Footer */
+.footer {
+  background: #111 !important;
+  border-top: 1px solid #333;
+}
+.footer a {
+  color: #d4b46a !important;
+}
+.footer a:hover {
+  color: #f5dca0 !important;
+}
+
+/* --------------------------------------------------
+   ESTILOS ESPECÍFICOS PARA LIBROS Y RANKINGS
+-------------------------------------------------- */
+
+/* Filtros de género */
+.filtros, .generos, .categorias, .tags {
+  background: #111 !important;
+  border: 1px solid #333 !important;
+  padding: 15px;
+  border-radius: 10px;
+}
+.filtros a, .generos a, .categorias a, .tags a {
+  color: #d4b46a !important;
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  padding: 8px 14px;
+  border-radius: 8px;
+  display: inline-block;
+}
+.filtros a:hover, .generos a:hover {
+  background: #d4b46a !important;
+  color: #000 !important;
+}
+
+/* Cards de libros */
+.card img {
+  border-bottom: 1px solid #333 !important;
+}
+
+/* Ratings */
+.rating, .estrellas, .stars {
+  color: #d4b46a !important;
+}
+
+/* Descripciones */
+.card p {
+  color: #e8e0c8 !important;
+}
+
+/* --------------------------------------------------
+   BLOG
+-------------------------------------------------- */
+
+.blog-card {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  color: #e8e0c8 !important;
+}
+.blog-card h3 {
+  color: #d4b46a !important;
+}
+.blog-card p {
+  color: #e8e0c8 !important;
+}
+.blog-card .leer-mas {
+  color: #d4b46a !important;
+}
+.blog-card:hover {
+  box-shadow: 0 4px 12px rgba(212,180,106,0.2);
+}
+
+/* --------------------------------------------------
+   PÁGINAS INTERNAS (libro.html, articulo.html, etc.)
+-------------------------------------------------- */
+
+.detalle, .contenido, .articulo, .info {
+  background: #111 !important;
+  border: 1px solid #333 !important;
+  padding: 30px;
+  border-radius: 12px;
+}
+.detalle h2, .articulo h2 {
+  color: #d4b46a !important;
+}
