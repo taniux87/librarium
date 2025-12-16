@@ -681,3 +681,132 @@ p {
 .bloque-seo a:hover {
   color: #fff; /* blanco al pasar el ratón */
 }
+/* --------------------------------------------------
+   TEMA OSCURO PREMIUM LIBRARIUM
+-------------------------------------------------- */
+
+/* Fondo general */
+body {
+  background: #0b0b0b;
+  color: #e8e0c8;
+  font-family: "Merriweather", serif;
+}
+
+/* Títulos dorados */
+h1, h2, h3, h4 {
+  color: #d4b46a;
+  font-family: "Merriweather", serif;
+}
+
+/* Párrafos */
+p, li, a, span {
+  color: #e8e0c8;
+}
+
+/* Enlaces */
+a {
+  color: #d4b46a;
+  text-decoration: none;
+}
+a:hover {
+  color: #f5dca0;
+}
+
+/* Header */
+.header {
+  background: #111;
+  border-bottom: 1px solid #333;
+}
+
+.menu a {
+  color: #e8e0c8;
+}
+.menu a.active {
+  border-bottom: 2px solid #d4b46a;
+  color: #d4b46a;
+}
+.menu a:hover {
+  color: #f5dca0;
+}
+
+/* Buscador */
+.search-box input {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #e8e0c8;
+}
+.search-box button {
+  background: #d4b46a;
+  color: #000;
+}
+
+/* Hero */
+.hero {
+  background-size: cover;
+  background-position: center;
+}
+.hero-overlay {
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+}
+
+/* Secciones */
+.section {
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  border: 1px solid #222;
+}
+
+/* Cards */
+.card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #e8e0c8;
+}
+.card h3 {
+  color: #d4b46a;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(212,180,106,0.2);
+}
+
+/* Grid */
+.grid {
+  gap: 25px;
+}
+
+/* Listas de artículos */
+.list-item {
+  color: #d4b46a;
+  border-bottom: 1px solid #333;
+}
+.list-item:hover {
+  color: #f5dca0;
+}
+
+/* Bloques SEO */
+.bloque-seo {
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  margin: 40px auto;
+  border: 1px solid #222;
+}
+.bloque-seo ul li a {
+  color: #d4b46a;
+}
+
+/* Footer */
+.footer {
+  background: #111;
+  border-top: 1px solid #333;
+}
+.footer a {
+  color: #d4b46a;
+}
+.footer a:hover {
+  color: #f5dca0;
+}
