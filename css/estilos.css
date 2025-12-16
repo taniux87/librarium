@@ -394,3 +394,221 @@ body {
   font-weight: 600;
   color: #C9A86A;
 }
+/* --------------------------------------------------
+   BLOQUE SUPERIOR PREMIUM (H1 + P)
+-------------------------------------------------- */
+.top-intro {
+  background: #000; /* fondo negro */
+  color: #C9A86A; /* dorado */
+  padding: 40px 20px;
+  text-align: center;
+  font-family: 'Merriweather', serif;
+  border-bottom: 2px solid #C9A86A;
+  margin-bottom: 0;
+}
+
+.top-intro h1 {
+  font-size: 2.4rem;
+  margin-bottom: 12px;
+  color: #C9A86A;
+  letter-spacing: 1px;
+}
+
+.top-intro p {
+  font-size: 1.15rem;
+  color: #e6e6e6;
+  max-width: 900px;
+  margin: auto;
+  line-height: 1.7;
+}
+/* --------------------------------------------------
+   BOTONES PREMIUM (negro + dorado)
+   No afecta a tus botones actuales
+-------------------------------------------------- */
+.btn-premium {
+  display: inline-block;
+  padding: 12px 22px;
+  background: #000;
+  color: #C9A86A;
+  border: 2px solid #C9A86A;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: 0.25s ease;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.btn-premium:hover {
+  background: #C9A86A;
+  color: #000;
+  box-shadow: 0 4px 14px rgba(201,168,106,0.45);
+  transform: translateY(-3px);
+}
+/* --------------------------------------------------
+   PREMIUM: BLOQUES SEO (negro + dorado)
+-------------------------------------------------- */
+.bloque-seo {
+  background: #000;
+  border: 1px solid #C9A86A;
+  padding: 28px 32px;
+  border-radius: 14px;
+  margin: 40px auto;
+  max-width: 950px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+}
+
+.bloque-seo h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 1.8rem;
+  color: #C9A86A;
+  margin-bottom: 14px;
+}
+
+.bloque-seo p {
+  color: #e6e6e6;
+  font-size: 1.05rem;
+  margin-bottom: 18px;
+}
+
+.bloque-seo ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bloque-seo li {
+  margin-bottom: 10px;
+}
+
+.bloque-seo a {
+  color: #C9A86A;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.25s ease;
+}
+
+.bloque-seo a:hover {
+  color: #fff;
+}
+
+/* --------------------------------------------------
+   PREMIUM: ESPACIADOS GENERALES
+-------------------------------------------------- */
+.section {
+  margin: 35px 0;
+}
+
+.section h2 {
+  margin-bottom: 18px;
+}
+
+/* --------------------------------------------------
+   PREMIUM: TARJETAS (cards)
+-------------------------------------------------- */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #C9A86A;
+  box-shadow: 0 3px 10px rgba(201,168,106,0.25);
+  transition: 0.25s ease;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(201,168,106,0.35);
+}
+
+.card h3 {
+  color: #0A3D62;
+  font-family: 'Merriweather', serif;
+}
+
+.card p {
+  color: #333;
+}
+
+/* --------------------------------------------------
+   PREMIUM: LISTA DE BLOG
+-------------------------------------------------- */
+.list-item {
+  background: #fff;
+  border: 1px solid #C9A86A;
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: 0.25s ease;
+}
+
+.list-item:hover {
+  background: #FDF8EE;
+  border-color: #b8955c;
+}
+
+/* --------------------------------------------------
+   PREMIUM: FOOTER
+-------------------------------------------------- */
+.footer {
+  background: #0A3D62;
+  color: #fff;
+  padding: 40px 0;
+  border-top: 4px solid #C9A86A;
+}
+
+.footer-links a {
+  color: #C9A86A;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+/* --------------------------------------------------
+   PREMIUM: HERO (sin tocar tu imagen)
+-------------------------------------------------- */
+.hero {
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  border-radius: inherit;
+}
+
+.hero > .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* --------------------------------------------------
+   PREMIUM: GRID
+-------------------------------------------------- */
+.grid {
+  gap: 28px;
+}
+
+/* --------------------------------------------------
+   PREMIUM: TIPOGRAFÍA GENERAL
+-------------------------------------------------- */
+h1, h2, h3 {
+  letter-spacing: 0.5px;
+}
+
+p {
+  line-height: 1.65;
+}
