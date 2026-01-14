@@ -2,97 +2,71 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Reseñas de Libros – Librarium.es</title>
+  <title>Reseñas de libros – Opiniones y valoraciones | Librarium.es</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/estilos.css">
-  <meta name="description" content="Reseñas automáticas de libros con valoraciones, datos y fichas detalladas.">
+
+  <meta name="description" content="Reseñas editoriales de libros en Librarium.es. Opiniones, valoraciones y análisis para ayudarte a decidir qué libro leer.">
 
   <style>
-    /* ✅ Estilos de pestañas */
-    .tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-
+    .tabs { display:flex; gap:12px; margin-bottom:25px; flex-wrap:wrap; }
     .tab-btn {
-      padding: 10px 18px;
-      background: #0A3D62;
-      color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-      border: 1px solid #082f4a;
-      transition: 0.2s ease;
-      font-weight: 600;
+      padding:10px 18px; background:#0A3D62; color:#fff;
+      border-radius:8px; cursor:pointer; border:1px solid #082f4a;
+      transition:.2s ease; font-weight:600;
+    }
+    .tab-btn:hover { background:#082f4a; }
+    .tab-btn.active { background:#C9A86A; color:#111; border-color:#b8955c; }
+
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    .ranking-intro {
+      max-width:800px;
+      margin-bottom:20px;
+      color:#444;
     }
 
-    .tab-btn:hover {
-      background: #082f4a;
-    }
-
-    .tab-btn.active {
-      background: #C9A86A;
-      color: #111;
-      border-color: #b8955c;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* ✅ Paginación */
     .pagination {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
+      margin-top:20px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
     }
 
     .pagination button {
-      padding: 8px 14px;
-      border-radius: 6px;
-      border: none;
-      background: #0A3D62;
-      color: #fff;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .pagination button:hover {
-      background: #082f4a;
+      padding:8px 14px;
+      border-radius:6px;
+      border:none;
+      background:#0A3D62;
+      color:#fff;
+      cursor:pointer;
     }
 
     .pagination button:disabled {
-      background: #999;
-      cursor: not-allowed;
+      background:#999;
+      cursor:not-allowed;
     }
   </style>
 </head>
 
 <body>
 
-<!-- ✅ HEADER UNIFICADO -->
 <header class="header">
   <div class="container header-flex">
-
     <div class="logo-box">
       <span class="logo-icon">📚</span>
       <span class="logo-text">Librarium.es</span>
     </div>
 
     <nav class="menu">
-        <a href="index.html" class="active">Inicio</a>
-        <a href="blog.html">Blog</a>
-        <a href="libros.html">Libros</a>
-        <a href="rankings.html">Rankings</a>
-        <a href="resenas.html">Reseñas</a>
-        <a href="contacto.html">Contacto</a>
-      </nav>
+      <a href="index.html">Inicio</a>
+      <a href="blog.html">Blog</a>
+      <a href="libros.html">Libros</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="resenas.html" class="active">Reseñas</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
 
     <div class="search-box">
       <form action="buscar.html" method="GET">
@@ -100,217 +74,185 @@
         <button type="submit">🔍</button>
       </form>
     </div>
-
   </div>
 </header>
 
-<section class="hero" style="background-image: url('img/hero.png');">
-  <div class="container" style="background: rgba(0,0,0,0.55); padding: 50px 30px; border-radius: 12px;">
-    <h2 style="color: #fff; font-size: 2.2rem;">Reseñas de libros</h2>
-    <p style="color: #ddd; font-size: 1.1rem;">Explora reseñas ordenadas por valoración.</p>
+<section class="hero" style="background-image:url('img/hero.png');">
+  <div class="container" style="background:rgba(0,0,0,.55);padding:50px 30px;border-radius:12px;">
+    <h1 style="color:#fff;">Reseñas de libros</h1>
+    <p style="color:#ddd;">
+      Opiniones y valoraciones editoriales para ayudarte a decidir qué leer.
+    </p>
   </div>
 </section>
 
 <main class="container">
 
-  <!-- ✅ PESTAÑAS -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="fantasia">Fantasía</button>
-    <button class="tab-btn" data-tab="terror">Terror</button>
-    <button class="tab-btn" data-tab="romance">Romance</button>
-    <button class="tab-btn" data-tab="thriller">Thriller</button>
-    <button class="tab-btn" data-tab="scifi">Sci‑Fi</button>
-    <button class="tab-btn" data-tab="misterio">Misterio</button>
-    <button class="tab-btn" data-tab="noficcion">No Ficción</button>
-    <button class="tab-btn" data-tab="juvenil">Juvenil</button>
-    <button class="tab-btn" data-tab="historia">Historia</button>
-    <button class="tab-btn" data-tab="autoayuda">Autoayuda</button>
-  </div>
+<section class="bloque-editorial">
+  <h2>Cómo elaboramos nuestras reseñas</h2>
+  <p>
+    Las reseñas de Librarium combinan datos de valoración con análisis editorial.
+    No se trata solo de estrellas, sino de ofrecer contexto para que puedas decidir
+    si un libro encaja contigo y con tu momento lector.
+  </p>
+  <p>
+    Explora las reseñas por género y utiliza esta sección como guía,
+    no como una verdad absoluta.
+  </p>
+</section>
 
-  <!-- ✅ CONTENIDO DE CADA PESTAÑA -->
-  <section id="fantasia" class="tab-content active">
-    <h2>Fantasía</h2>
-    <div class="grid"></div>
-    <div id="fantasia-paginacion" class="pagination"></div>
-  </section>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="fantasia">Fantasía</button>
+  <button class="tab-btn" data-tab="terror">Terror</button>
+  <button class="tab-btn" data-tab="romance">Romance</button>
+  <button class="tab-btn" data-tab="thriller">Thriller</button>
+  <button class="tab-btn" data-tab="scifi">Ciencia ficción</button>
+  <button class="tab-btn" data-tab="misterio">Misterio</button>
+  <button class="tab-btn" data-tab="noficcion">No ficción</button>
+  <button class="tab-btn" data-tab="juvenil">Juvenil</button>
+  <button class="tab-btn" data-tab="historia">Historia</button>
+  <button class="tab-btn" data-tab="autoayuda">Autoayuda</button>
+</div>
 
-  <section id="terror" class="tab-content">
-    <h2>Terror</h2>
-    <div class="grid"></div>
-    <div id="terror-paginacion" class="pagination"></div>
-  </section>
+<section id="fantasia" class="tab-content active">
+  <h2>Fantasía</h2>
+  <p class="ranking-intro">Reseñas de novelas fantásticas con mundos imaginativos y grandes aventuras.</p>
+  <div class="grid"></div>
+  <div id="fantasia-paginacion" class="pagination"></div>
+</section>
 
-  <section id="romance" class="tab-content">
-    <h2>Romance</h2>
-    <div class="grid"></div>
-    <div id="romance-paginacion" class="pagination"></div>
-  </section>
+<section id="terror" class="tab-content">
+  <h2>Terror</h2>
+  <p class="ranking-intro">Libros que destacan por su atmósfera inquietante y tensión psicológica.</p>
+  <div class="grid"></div>
+  <div id="terror-paginacion" class="pagination"></div>
+</section>
 
-  <section id="thriller" class="tab-content">
-    <h2>Thriller</h2>
-    <div class="grid"></div>
-    <div id="thriller-paginacion" class="pagination"></div>
-  </section>
+<section id="romance" class="tab-content">
+  <h2>Romance</h2>
+  <p class="ranking-intro">Historias centradas en relaciones, emociones y personajes cercanos.</p>
+  <div class="grid"></div>
+  <div id="romance-paginacion" class="pagination"></div>
+</section>
 
-  <section id="scifi" class="tab-content">
-    <h2>Ciencia Ficción</h2>
-    <div class="grid"></div>
-    <div id="scifi-paginacion" class="pagination"></div>
-  </section>
+<section id="thriller" class="tab-content">
+  <h2>Thriller</h2>
+  <p class="ranking-intro">Reseñas de thrillers intensos, con ritmo rápido y giros inesperados.</p>
+  <div class="grid"></div>
+  <div id="thriller-paginacion" class="pagination"></div>
+</section>
 
-  <section id="misterio" class="tab-content">
-    <h2>Misterio</h2>
-    <div class="grid"></div>
-    <div id="misterio-paginacion" class="pagination"></div>
-  </section>
+<section id="scifi" class="tab-content">
+  <h2>Ciencia ficción</h2>
+  <p class="ranking-intro">Libros que exploran futuros posibles, tecnología y dilemas humanos.</p>
+  <div class="grid"></div>
+  <div id="scifi-paginacion" class="pagination"></div>
+</section>
 
-  <section id="noficcion" class="tab-content">
-    <h2>No Ficción</h2>
-    <div class="grid"></div>
-    <div id="noficcion-paginacion" class="pagination"></div>
-  </section>
+<section id="misterio" class="tab-content">
+  <h2>Misterio</h2>
+  <p class="ranking-intro">Novelas de investigación, enigmas y secretos por resolver.</p>
+  <div class="grid"></div>
+  <div id="misterio-paginacion" class="pagination"></div>
+</section>
 
-  <section id="juvenil" class="tab-content">
-    <h2>Juvenil</h2>
-    <div class="grid"></div>
-    <div id="juvenil-paginacion" class="pagination"></div>
-  </section>
+<section id="noficcion" class="tab-content">
+  <h2>No ficción</h2>
+  <p class="ranking-intro">Ensayos y libros basados en hechos reales analizados con criterio.</p>
+  <div class="grid"></div>
+  <div id="noficcion-paginacion" class="pagination"></div>
+</section>
 
-  <section id="historia" class="tab-content">
-    <h2>Historia</h2>
-    <div class="grid"></div>
-    <div id="historia-paginacion" class="pagination"></div>
-  </section>
+<section id="juvenil" class="tab-content">
+  <h2>Juvenil</h2>
+  <p class="ranking-intro">Lecturas accesibles y dinámicas pensadas para jóvenes lectores.</p>
+  <div class="grid"></div>
+  <div id="juvenil-paginacion" class="pagination"></div>
+</section>
 
-  <section id="autoayuda" class="tab-content">
-    <h2>Autoayuda</h2>
-    <div class="grid"></div>
-    <div id="autoayuda-paginacion" class="pagination"></div>
-  </section>
+<section id="historia" class="tab-content">
+  <h2>Historia</h2>
+  <p class="ranking-intro">Libros históricos analizados desde una perspectiva divulgativa.</p>
+  <div class="grid"></div>
+  <div id="historia-paginacion" class="pagination"></div>
+</section>
+
+<section id="autoayuda" class="tab-content">
+  <h2>Autoayuda</h2>
+  <p class="ranking-intro">Reseñas de libros centrados en desarrollo personal y bienestar.</p>
+  <div class="grid"></div>
+  <div id="autoayuda-paginacion" class="pagination"></div>
+</section>
 
 </main>
 
 <footer class="footer">
   <div class="container">
     <p>© 2025 Librarium.es – Todos los derechos reservados</p>
-   <div class="footer-links">
-  <a href="quienes-somos.html">Quiénes somos</a>
-  <a href="privacidad.html">Política de privacidad</a>
-  <a href="cookies.html">Política de cookies</a>
-  <a href="aviso-legal.html">Aviso legal</a>
-</div>
-
+    <div class="footer-links">
+      <a href="quienes-somos.html">Quiénes somos</a>
+      <a href="privacidad.html">Política de privacidad</a>
+      <a href="cookies.html">Política de cookies</a>
+      <a href="aviso-legal.html">Aviso legal</a>
+    </div>
   </div>
 </footer>
 
 <script>
-  /* ✅ Estrellas visuales */
-  function generarEstrellas(rating) {
-    const estrellas = Math.round(rating);
-    return "⭐".repeat(estrellas) + ` (${rating}/5)`;
+  function generarEstrellas(r){ return "⭐".repeat(Math.round(r))+` (${r}/5)`;}
+  function ratingAlternativo(t){ let s=0; for(let i=0;i<t.length;i++)s+=t.charCodeAt(i); return (3.5+(s%13)/10).toFixed(1);}
+
+  async function buscarLibros(q,start=0,max=12){
+    const url=`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&langRestrict=es&startIndex=${start}&maxResults=${max}`;
+    const r=await fetch(url); const d=await r.json(); return d.items||[];
   }
 
-  /* ✅ Rating alternativo */
-  function ratingAlternativo(titulo) {
-    let seed = 0;
-    for (let i = 0; i < titulo.length; i++) seed += titulo.charCodeAt(i);
-    const random = (seed % 13) / 10;
-    return (3.5 + random).toFixed(1);
+  function portada(info){
+    if(info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:/,"https:");
+    return "img/portada-default.png";
   }
 
-  /* ✅ Portada híbrida */
-  function obtenerISBN(info) {
-    if (!info.industryIdentifiers) return null;
-    for (const id of info.industryIdentifiers) {
-      if (id.type === "ISBN_13") return id.identifier;
-      if (id.type === "ISBN_10") return id.identifier;
-    }
-    return null;
-  }
-
-  function portadaLibro(info) {
-    const isbn = obtenerISBN(info);
-    if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-    if (info.imageLinks?.thumbnail) return info.imageLinks.thumbnail.replace(/^http:\/\//i, "https://");
-    return "img/ejemplo.jpg";
-  }
-
-  /* ✅ Buscar libros */
-  async function buscarLibros(query, startIndex = 0, max = 12) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&startIndex=${startIndex}&maxResults=${max}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.items || [];
-  }
-
-  /* ✅ Tarjeta */
-  function crearCard(item) {
-    const info = item.volumeInfo;
-    const id = item.id;
-    const portada = portadaLibro(info);
-    const titulo = info.title || "Título no disponible";
-    const autor = info.authors ? info.authors.join(", ") : "Autor desconocido";
-    const rating = info.averageRating || ratingAlternativo(titulo);
-
+  function crearCard(item){
+    const i=item.volumeInfo;
+    const r=i.averageRating||ratingAlternativo(i.title);
     return `
-      <a href="libro.html?id=${encodeURIComponent(id)}" class="card">
-        <img src="${portada}" alt="Portada libro">
-        <h3>${titulo}</h3>
-        <p><strong>${autor}</strong></p>
-        <p>${generarEstrellas(rating)}</p>
-      </a>
-    `;
+      <a href="libro.html?id=${item.id}" class="card">
+        <img src="${portada(i)}" alt="Portada libro">
+        <h3>${i.title}</h3>
+        <p><strong>${i.authors?.join(", ")||"Autor desconocido"}</strong></p>
+        <p>${generarEstrellas(r)}</p>
+      </a>`;
   }
 
-  /* ✅ Cargar página con ordenación */
-  async function cargarPagina(id, query, pagina = 1) {
-    const cont = document.querySelector(`#${id} .grid`);
-    const paginacion = document.getElementById(id + "-paginacion");
-
-    const startIndex = (pagina - 1) * 12;
-    let libros = await buscarLibros(query, startIndex, 12);
-
-    libros.sort((a, b) => {
-      const rA = a.volumeInfo.averageRating || ratingAlternativo(a.volumeInfo.title);
-      const rB = b.volumeInfo.averageRating || ratingAlternativo(b.volumeInfo.title);
-      return rB - rA;
-    });
-
-    cont.innerHTML = "";
-    libros.forEach(item => cont.innerHTML += crearCard(item));
-
-    paginacion.innerHTML = `
-      <button onclick="cargarPagina('${id}', '${query}', ${pagina - 1})" ${pagina === 1 ? "disabled" : ""}>← Anterior</button>
-      <span>Página ${pagina}</span>
-      <button onclick="cargarPagina('${id}', '${query}', ${pagina + 1})">Siguiente →</button>
-    `;
+  async function cargarPagina(id,q,p=1){
+    const c=document.querySelector(`#${id} .grid`);
+    const pag=document.getElementById(id+"-paginacion");
+    const libros=await buscarLibros(q,(p-1)*12,12);
+    c.innerHTML=libros.map(crearCard).join("");
+    pag.innerHTML=`
+      <button onclick="cargarPagina('${id}','${q}',${p-1})" ${p===1?"disabled":""}>← Anterior</button>
+      <span>Página ${p}</span>
+      <button onclick="cargarPagina('${id}','${q}',${p+1})">Siguiente →</button>`;
   }
 
-  /* ✅ Cargar todas las categorías */
-  cargarPagina("fantasia", "best fantasy books");
-  cargarPagina("terror", "best horror books");
-  cargarPagina("romance", "best romance novels");
-  cargarPagina("thriller", "best thriller books");
+  cargarPagina("fantasia","best fantasy books");
+  cargarPagina("terror","best horror books");
+  cargarPagina("romance","best romance novels");
+  cargarPagina("thriller","best thriller books");
+  cargarPagina("scifi","best science fiction books");
+  cargarPagina("misterio","best mystery books");
+  cargarPagina("noficcion","best nonfiction books");
+  cargarPagina("juvenil","best young adult books");
+  cargarPagina("historia","best history books");
+  cargarPagina("autoayuda","best self help books");
 
-  cargarPagina("scifi", "best science fiction books");
-  cargarPagina("misterio", "best mystery books");
-  cargarPagina("noficcion", "best nonfiction books");
-  cargarPagina("juvenil", "best young adult books");
-  cargarPagina("historia", "best history books");
-  cargarPagina("autoayuda", "best self help books");
-
-  /* ✅ Lógica de pestañas */
-  const tabs = document.querySelectorAll(".tab-btn");
-  const contents = document.querySelectorAll(".tab-content");
-
-  tabs.forEach(btn => {
-    btn.addEventListener("click", () => {
-      tabs.forEach(b => b.classList.remove("active"));
-      contents.forEach(c => c.classList.remove("active"));
-
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.add("active");
-    });
+  document.querySelectorAll(".tab-btn").forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      document.getElementById(b.dataset.tab).classList.add("active");
+    };
   });
 </script>
 
